@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+<html dir="ltr" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Proyecto KN</title>
+    <link href="~/Content/style.min.css" rel="stylesheet" />
+</head>
+
+<body>
+
+    <div class="main-wrapper">
+
+        @RenderBody()
+
+    </div>
+
+    <script src="~/Scripts/jquery.min.js"></script>
+    <script src="~/Scripts/popper.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+
+    <script>
+        $('[data-toggle="tooltip"]').tooltip();
+        $(".preloader").fadeOut();
+        $('#to-recover').on("click", function () {
+            $("#loginform").slideUp();
+            $("#recoverform").fadeIn();
+        });
+    </script>
+
+</body>
+
+</html>
