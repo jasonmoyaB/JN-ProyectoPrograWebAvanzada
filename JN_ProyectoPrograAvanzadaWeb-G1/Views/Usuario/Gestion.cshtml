@@ -1,0 +1,88 @@
+﻿@model List<Usuario>
+@{
+    ViewData["Title"] = "Gestión de Usuarios";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- DataTables + Bootstrap 5 -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h2 class="mb-0 text-secondary">Gestión de Usuarios</h2>
+        <span class="text-muted">Total: @Model.Count</span>
+    </div>
+
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-light border-start border-success border-3 shadow-sm" role="alert">
+            @TempData["Mensaje"]
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <table id="tablaUsuarios" class="table table-sm table-hover align-middle">
+                <thead class="table-light">
+                    <tr class="text-muted">
+                        <th>Nombre</th>
+                        <th>Correo</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var usuario in Model)
+                    {
+                        <tr>
+                            <td>@usuario.Nombre</td>
+                            <td>@usuario.CorreoElectronico</td>
+                            <td>
+                                <span class="badge rounded-pill bg-light text-dark border">
+                                    @usuario.Rol?.NombreRol
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill @(usuario.Activo ? "bg-light text-success border" : "bg-light text-muted border")">
+                                    @(usuario.Activo ? "Activo" : "Inactivo")
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <a asp-action="Editar" asp-route-id="@usuario.UsuarioID" class="btn btn-sm btn-outline-secondary me-1" title="Editar">
+                                    Editar
+                                </a>
+                                <form asp-action="ToggleEstado" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@usuario.UsuarioID" />
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary" title="@(usuario.Activo ? "Desactivar" : "Activar")">
+                                        @(usuario.Activo ? "Desactivar" : "Activar")
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#tablaUsuarios').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                },
+                pageLength: 8,
+                lengthChange: false,
+                ordering: true,
+                responsive: true
+            });
+        });
+    </script>
+}

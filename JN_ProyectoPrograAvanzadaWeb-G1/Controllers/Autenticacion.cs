@@ -24,7 +24,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            return View(); // -> Views/Autenticacion/Login.cshtml
+            return View(); 
         }
 
         [HttpPost]
@@ -48,18 +48,19 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
                 return View("Login", model);
             }
 
+            //Guardar ID en sesión para que funcione el controlador Usuario
+            HttpContext.Session.SetInt32("UsuarioID", usuario.UsuarioID);
             HttpContext.Session.SetString("Usuario", usuario.Nombre);
             HttpContext.Session.SetInt32("RolID", usuario.RolID);
 
-            // ✅ Redirección correcta al Home/Main
             return RedirectToAction("Main", "Home");
         }
 
         [HttpGet]
         public IActionResult Registro()
         {
-            // Ya no necesitas cargar roles
-            return View(); // -> Views/Autenticacion/Registro.cshtml
+           
+            return View(); 
         }
 
         [HttpPost]
@@ -77,7 +78,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
                 return View("Registro", model);
             }
 
-            // 🔒 Forzar que todo nuevo usuario sea "Vendedor"
+            
             var vendedor = _context.Roles.FirstOrDefault(r => r.NombreRol == "Vendedor");
             if (vendedor == null)
             {
@@ -126,12 +127,12 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
                 return View(model);
             }
 
-            // 🔑 Generar nueva contraseña temporal
-            string nuevaClave = Guid.NewGuid().ToString("N")[..8]; // 8 caracteres aleatorios
+           
+            string nuevaClave = Guid.NewGuid().ToString("N")[..8]; 
             usuario.ContrasenaHash = PasswordHelper.HashPassword(nuevaClave);
             _context.SaveChanges();
 
-            // 📩 Simular envío de correo (aquí podrías integrar SMTP si quieres)
+           
             TempData["Mensaje"] = $"Tu nueva contraseña temporal es: {nuevaClave}. Por favor cámbiala después de iniciar sesión.";
 
             return RedirectToAction(nameof(Login));
@@ -140,18 +141,18 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
 
         public IActionResult Logout()
         {
-            // 1️⃣ Limpiar toda la sesión activa del usuario
+           
             HttpContext.Session.Clear();
 
-            // 2️⃣ Cerrar cualquier cookie de autenticación activa
+            
             HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            // 3️⃣ Invalidar la caché del navegador para que no se pueda retroceder con “Atrás”
+            
             Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
             Response.Headers["Pragma"] = "no-cache";
             Response.Headers["Expires"] = "0";
 
-            // 4️⃣ Redirigir de forma segura al login
+            
             return RedirectToAction(nameof(Login), "Autenticacion");
         }
     }
