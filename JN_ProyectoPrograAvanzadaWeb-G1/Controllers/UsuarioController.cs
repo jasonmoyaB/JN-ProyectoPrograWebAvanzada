@@ -116,7 +116,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
             return RedirectToAction("Perfil");
         }
 
-        // PANEL DE ADMINISTRACIÓN
+        // PANEL DE ADMINISTRACIN
         [HttpGet]
         public IActionResult Gestion()
         {
@@ -229,7 +229,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
 
             _context.SaveChanges();
 
-            // Actualizar nombre en sesión si el usuario editado es el mismo que está logueado
+            
             if (HttpContext.Session.GetInt32("UsuarioID") == usuario.UsuarioID)
             {
                 HttpContext.Session.SetString("Usuario", usuario.Nombre);

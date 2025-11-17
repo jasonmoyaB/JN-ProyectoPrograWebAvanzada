@@ -48,7 +48,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
                 return View("Login", model);
             }
 
-            //Guardar ID en sesión para que funcione el controlador Usuario
+            
             HttpContext.Session.SetInt32("UsuarioID", usuario.UsuarioID);
             HttpContext.Session.SetString("Usuario", usuario.Nombre);
             HttpContext.Session.SetInt32("RolID", usuario.RolID);
@@ -79,10 +79,10 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
             }
 
             
-            var vendedor = _context.Roles.FirstOrDefault(r => r.NombreRol == "Vendedor");
-            if (vendedor == null)
+            var tecnico = _context.Roles.FirstOrDefault(r => r.NombreRol == "Técnico" || r.NombreRol == "Tecnico");
+            if (tecnico == null)
             {
-                ModelState.AddModelError("", "No se encontró el rol 'Vendedor'. Configura los roles en el sistema.");
+                ModelState.AddModelError("", "No se encontró el rol 'Técnico'. Configura los roles en el sistema.");
                 return View("Registro", model);
             }
 
@@ -91,7 +91,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
                 Nombre = model.Nombre,
                 CorreoElectronico = model.CorreoElectronico,
                 ContrasenaHash = PasswordHelper.HashPassword(model.Contrasena),
-                RolID = vendedor.RolID, // <- se ignora model.RolID y se fuerza Vendedor
+                RolID = tecnico.RolID, 
                 Activo = true
             };
 
@@ -105,7 +105,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
         [HttpGet]
         public IActionResult RecuperarClave()
         {
-            return View(); // -> Views/Autenticacion/RecuperarClave.cshtml
+            return View(); 
         }
 
         // POST: /Autenticacion/RecuperarClave

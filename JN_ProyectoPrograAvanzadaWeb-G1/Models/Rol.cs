@@ -7,7 +7,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Models
         public int RolID { get; set; }
         public string NombreRol { get; set; }
 
-        // Un rol puede tener muchos usuarios
+       
         public ICollection<Usuario> Usuarios { get; set; }
     }
 }

@@ -15,13 +15,21 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Rol>().HasData(
-                new Rol { RolID = 1, NombreRol = "Administrador" },
-                new Rol { RolID = 2, NombreRol = "Vendedor" }
-            );
+            
+            modelBuilder.HasDefaultSchema("inv");
+
+            modelBuilder.Entity<Rol>(entity =>
+            {
+                entity.ToTable("Roles", "inv");
+                entity.HasData(
+                    new Rol { RolID = 1, NombreRol = "Administrador" },
+                    new Rol { RolID = 2, NombreRol = "Técnico" }
+                );
+            });
 
             modelBuilder.Entity<Usuario>(entity =>
             {
+                entity.ToTable("Usuarios", "inv");
                 entity.HasKey(e => e.UsuarioID);
                 entity.Property(e => e.Nombre).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.CorreoElectronico).IsRequired().HasMaxLength(100);
