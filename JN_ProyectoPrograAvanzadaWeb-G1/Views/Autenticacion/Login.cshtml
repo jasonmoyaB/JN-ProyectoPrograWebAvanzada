@@ -1,6 +1,5 @@
-@model JN_ProyectoPrograAvanzadaWeb_G1.Models.ViewModels.LoginViewModel
+﻿@model JN_ProyectoPrograAvanzadaWeb_G1.Models.ViewModels.LoginViewModel
 @{
-    ViewBag.Title = "Página de Inicio";
     Layout = "~/Views/Shared/_LayoutExterno.cshtml";
 }
 
@@ -31,7 +30,7 @@
                                     <div class="alert alert-danger">@ViewBag.Error</div>
                                 }
 
-                                <form asp-controller="Autenticacion" asp-action="Login" method="post">
+                                <form asp-action="Login" method="post">
                                     @Html.AntiForgeryToken()
                                     <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
 
@@ -51,7 +50,7 @@
                                         <button type="submit" class="btn btn-primary btn-lg shadow-sm">Ingresar</button>
                                     </div>
 
-                                    <!-- Enlace: Recuperar contraseña -->
+                                    <!-- Nuevo enlace: Recuperar contraseña -->
                                     <div class="mt-3 text-center small">
                                         <a asp-controller="Autenticacion" asp-action="RecuperarClave"
                                            class="text-decoration-none text-secondary fw-semibold">
@@ -75,16 +74,3 @@
         </div>
     </div>
 </section>
-
-<footer class="py-4 bg-light mt-auto">
-    <div class="container-fluid px-4">
-        <div class="d-flex align-items-center justify-content-between small">
-            <div class="text-muted">Copyright &copy; Sistema de Gestión 2024</div>
-            <div>
-                <a asp-controller="Home" asp-action="Privacy">Política de Privacidad</a>
-                &middot;
-                <a href="#">Términos y Condiciones</a>
-            </div>
-        </div>
-    </div>
-</footer>

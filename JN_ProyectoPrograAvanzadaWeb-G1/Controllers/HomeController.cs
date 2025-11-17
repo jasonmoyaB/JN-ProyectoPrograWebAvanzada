@@ -13,9 +13,10 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
             _logger = logger;
         }
 
+        [HttpGet]
         public IActionResult Index()
         {
-            return View();
+            return View(new JN_ProyectoPrograAvanzadaWeb_G1.Models.ViewModels.LoginViewModel());
         }
 
         public IActionResult Privacy()

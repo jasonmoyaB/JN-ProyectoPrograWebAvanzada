@@ -1,0 +1,50 @@
+﻿@model UsuarioPerfilViewModel
+@{
+    ViewData["Title"] = "Perfil";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <h2 class="mb-4">Mi Perfil</h2>
+
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-success">@TempData["Mensaje"]</div>
+    }
+
+    <form asp-action="Perfil" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="UsuarioID" />
+
+        <div class="mb-3">
+            <label asp-for="Nombre" class="form-label">Nombre</label>
+            <input asp-for="Nombre" class="form-control" />
+            <span asp-validation-for="Nombre" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CorreoElectronico" class="form-label">Correo electrónico</label>
+            <input asp-for="CorreoElectronico" class="form-control" />
+            <span asp-validation-for="CorreoElectronico" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Rol" class="form-label">Rol asignado</label>
+            <input asp-for="Rol" class="form-control" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Activo" class="form-label">Estado</label>
+            <select asp-for="Activo" class="form-select">
+                <option value="true">Activo</option>
+                <option value="false">Inactivo</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

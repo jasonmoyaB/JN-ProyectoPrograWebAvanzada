@@ -1,0 +1,58 @@
+﻿@model UsuarioEdicionViewModel
+@{
+    ViewData["Title"] = "Editar Usuario";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Editar Usuario</h1>
+
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-success">@TempData["Mensaje"]</div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form asp-action="Editar" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="UsuarioID" />
+
+                <div class="mb-3">
+                    <label asp-for="Nombre" class="form-label">Nombre</label>
+                    <input asp-for="Nombre" class="form-control" />
+                    <span asp-validation-for="Nombre" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CorreoElectronico" class="form-label">Correo electrónico</label>
+                    <input asp-for="CorreoElectronico" class="form-control" />
+                    <span asp-validation-for="CorreoElectronico" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="RolID" class="form-label">Rol asignado</label>
+                    <select asp-for="RolID" asp-items="Model.RolesDisponibles" class="form-select">
+                        <option value="">-- Seleccione un rol --</option>
+                    </select>
+                    <span asp-validation-for="RolID" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Activo" class="form-label">Estado</label>
+                    <select asp-for="Activo" class="form-select">
+                        <option value="true">Activo</option>
+                        <option value="false">Inactivo</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-success">Guardar cambios</button>
+                <a asp-action="Gestion" class="btn btn-secondary ms-2">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
