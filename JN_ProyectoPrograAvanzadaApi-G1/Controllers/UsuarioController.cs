@@ -7,5 +7,7 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Controllers
     [ApiController]
     public class UsuarioController : ControllerBase
     {
+        
+       
     }
 }
