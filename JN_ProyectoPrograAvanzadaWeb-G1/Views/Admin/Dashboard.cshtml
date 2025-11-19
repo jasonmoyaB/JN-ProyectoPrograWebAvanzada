@@ -1,0 +1,181 @@
+@{
+    ViewData["Title"] = "Dashboard Administrador";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-2">
+                <i class="bi bi-speedometer2 me-2"></i>Panel de Control - Administrador
+            </h1>
+            <p class="text-muted">Bienvenido, <strong>@ViewBag.UsuarioNombre</strong></p>
+        </div>
+    </div>
+
+    <!-- Estadísticas generales -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Bodegas
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalBodegas">-</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-building fs-1 text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Productos
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalProductos">-</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-box-seam fs-1 text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Solicitudes Pendientes
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="solicitudesPendientes">-</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-clipboard-check fs-1 text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Usuarios Activos
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="usuariosActivos">-</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-people fs-1 text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección para gráficos -->
+    <div class="row mb-4">
+        <div class="col-xl-8 col-lg-7 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Gráficos de Inventario</h6>
+                </div>
+                <div class="card-body">
+                    <div id="graficosInventario">
+                        <canvas id="chartInventario" style="height: 300px;"></canvas>
+                        <p class="text-muted text-center mt-3">Los gráficos se cargarán aquí</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-5 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">KPIs Principales</h6>
+                </div>
+                <div class="card-body">
+                    <div id="kpisPrincipales">
+                        <canvas id="chartKPIs" style="height: 300px;"></canvas>
+                        <p class="text-muted text-center mt-3">Los KPIs se cargarán aquí</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos adicionales -->
+    <div class="row">
+        <div class="col-xl-6 col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Movimientos por Tipo</h6>
+                </div>
+                <div class="card-body">
+                    <div id="graficoMovimientos">
+                        <canvas id="chartMovimientos" style="height: 250px;"></canvas>
+                        <p class="text-muted text-center mt-3">Gráfico de movimientos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6 col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Productos Más Solicitados</h6>
+                </div>
+                <div class="card-body">
+                    <div id="graficoProductosSolicitados">
+                        <canvas id="chartProductosSolicitados" style="height: 250px;"></canvas>
+                        <p class="text-muted text-center mt-3">Top productos solicitados</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertas de stock mínimo -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Alertas de Stock Mínimo</h5>
+                </div>
+                <div class="card-body">
+                    <div id="alertasStock" class="table-responsive">
+                        <p class="text-muted text-center">Cargando alertas...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#totalBodegas').text('0');
+            $('#totalProductos').text('0');
+            $('#solicitudesPendientes').text('0');
+            $('#usuariosActivos').text('0');
+        });
+    </script>
+}
+

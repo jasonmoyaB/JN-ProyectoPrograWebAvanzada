@@ -16,6 +16,16 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
         [HttpGet]
         public IActionResult Index()
         {
+            // Si el usuario ya está autenticado, redirigir según su rol
+            var rolId = HttpContext.Session.GetInt32("RolID");
+            if (rolId.HasValue)
+            {
+                if (rolId == 1) // Administrador
+                    return RedirectToAction("Dashboard", "Admin");
+                else if (rolId == 2) // Técnico
+                    return RedirectToAction("Dashboard", "Tecnico");
+            }
+            
             return View(new JN_ProyectoPrograAvanzadaWeb_G1.Models.ViewModels.LoginViewModel());
         }
 
@@ -23,12 +33,19 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
         {
             return View();
         }
+
         [HttpGet]
         public IActionResult Main()
         {
+            // Redirigir según el rol del usuario
+            var rolId = HttpContext.Session.GetInt32("RolID");
+            if (rolId == 1) // Administrador
+                return RedirectToAction("Dashboard", "Admin");
+            else if (rolId == 2) // Técnico
+                return RedirectToAction("Dashboard", "Tecnico");
+            
             return View();
         }
-
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
