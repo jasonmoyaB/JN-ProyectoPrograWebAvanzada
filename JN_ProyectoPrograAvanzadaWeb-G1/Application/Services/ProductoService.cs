@@ -13,9 +13,10 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Application.Services
             _productoRepository = productoRepository;
         }
 
+
         public async Task<List<ProductoDto>> GetAllAsync(bool? activo = null)
         {
-            var productos = await _productoRepository.GetAllAsync(activo);
+           var productos = await _productoRepository.GetAllAsync(activo);
             return productos.Select(p => new ProductoDto
             {
                 ProductoID = p.ProductoID,
@@ -44,7 +45,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Application.Services
                 FechaCreacion = producto.FechaCreacion
             };
         }
-
+               
         public async Task<ProductoDto?> GetBySkuAsync(string sku)
         {
             var producto = await _productoRepository.GetBySkuAsync(sku);
