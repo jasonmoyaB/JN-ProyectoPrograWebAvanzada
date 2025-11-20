@@ -10,6 +10,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Application.Services
         Task<bool> UpdateAsync(int bodegaId, CrearBodegaDto dto);
         Task<bool> ToggleActivoAsync(int bodegaId);
         Task<bool> ExistsAsync(int bodegaId);
+        Task<bool> DeleteAsync(int bodegaId);
     }
 }
 

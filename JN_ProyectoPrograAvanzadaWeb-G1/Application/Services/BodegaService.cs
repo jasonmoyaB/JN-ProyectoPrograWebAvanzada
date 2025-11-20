@@ -73,6 +73,11 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Application.Services
         {
             return await _bodegaRepository.ExistsAsync(bodegaId);
         }
+
+        public async Task<bool> DeleteAsync(int bodegaId)
+        {
+            return await _bodegaRepository.DeleteAsync(bodegaId);
+        }
     }
 }
 

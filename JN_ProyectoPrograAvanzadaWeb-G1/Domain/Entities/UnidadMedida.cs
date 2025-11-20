@@ -7,7 +7,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Domain.Entities
         public string? Abreviacion { get; set; }
         public bool Activo { get; set; } = true;
 
-        // Navegación
+       
         public ICollection<MovimientoDetalle> MovimientoDetalles { get; set; } = new List<MovimientoDetalle>();
     }
 }

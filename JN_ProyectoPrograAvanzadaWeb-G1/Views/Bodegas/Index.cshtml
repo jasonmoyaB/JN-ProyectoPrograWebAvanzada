@@ -1,0 +1,125 @@
+@model List<JN_ProyectoPrograAvanzadaWeb_G1.Application.DTOs.Bodegas.BodegaDto>
+@{
+    ViewData["Title"] = "Catálogo de Bodegas";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h2 class="mb-0 text-secondary">
+            <i class="bi bi-building me-2"></i>Catálogo de Bodegas
+        </h2>
+        <div>
+            <a asp-action="Crear" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i>Nueva Bodega
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="mb-3">
+                <form method="get" class="d-flex gap-2">
+                    <select name="activo" class="form-select" style="width: auto;">
+                        <option value="">Todos</option>
+                        <option value="true" selected="@(ViewBag.FiltroActivo == true)">Activos</option>
+                        <option value="false" selected="@(ViewBag.FiltroActivo == false)">Inactivos</option>
+                    </select>
+                    <button type="submit" class="btn btn-outline-secondary">Filtrar</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Limpiar</a>
+                </form>
+            </div>
+
+            <table id="tablaBodegas" class="table table-sm table-hover align-middle">
+                <thead class="table-light">
+                    <tr class="text-muted">
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Ubicación</th>
+                        <th>Estado</th>
+                        <th>Fecha Creación</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var bodega in Model)
+                    {
+                        <tr>
+                            <td>@bodega.BodegaID</td>
+                            <td><strong>@bodega.Nombre</strong></td>
+                            <td>@(bodega.Ubicacion ?? "-")</td>
+                            <td>
+                                <span class="badge rounded-pill @(bodega.Activo ? "bg-success" : "bg-secondary")">
+                                    @(bodega.Activo ? "Activo" : "Inactivo")
+                                </span>
+                            </td>
+                            <td>@(bodega.FechaCreacion?.ToString("dd/MM/yyyy") ?? "-")</td>
+                            <td class="text-center">
+                                <a asp-action="Editar" asp-route-id="@bodega.BodegaID" class="btn btn-sm btn-outline-primary me-1" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form asp-action="ToggleActivo" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@bodega.BodegaID" />
+                                    <button type="submit" class="btn btn-sm btn-outline-@(bodega.Activo ? "warning" : "success")" title="@(bodega.Activo ? "Desactivar" : "Activar")">
+                                        <i class="bi bi-@(bodega.Activo ? "x-circle" : "check-circle")"></i>
+                                    </button>
+                                </form>
+                                <form asp-action="Eliminar" method="post" class="d-inline" onsubmit="return confirmarEliminacion('@bodega.Nombre');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@bodega.BodegaID" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger ms-1" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#tablaBodegas').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                },
+                pageLength: 10,
+                lengthChange: true,
+                ordering: true,
+                responsive: true
+            });
+        });
+
+        function confirmarEliminacion(nombre) {
+            return confirm('¿Está seguro que desea eliminar la bodega "' + nombre + '"?\n\nEsta acción no se puede deshacer.');
+        }
+    </script>
+}
+
+

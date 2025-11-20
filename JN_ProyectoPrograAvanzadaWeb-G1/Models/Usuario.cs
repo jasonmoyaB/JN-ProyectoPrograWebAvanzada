@@ -9,6 +9,6 @@ public class Usuario
     public DateTime FechaRegistro { get; set; } = DateTime.UtcNow;
     public bool Activo { get; set; } = true;
 
-    public int RolID { get; set; } // Clave foránea
-    public Rol Rol { get; set; }   // Navegación
+    public int RolID { get; set; } 
+    public Rol Rol { get; set; }   
 }

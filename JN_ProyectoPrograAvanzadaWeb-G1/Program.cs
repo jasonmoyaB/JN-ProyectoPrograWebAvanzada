@@ -56,6 +56,8 @@ builder.Services.AddScoped<IBitacoraErroresRepository, BitacoraErroresRepository
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IBodegaService, BodegaService>();
+builder.Services.AddScoped<IProductoService, ProductoService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

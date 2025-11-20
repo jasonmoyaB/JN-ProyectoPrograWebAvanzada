@@ -7,7 +7,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Domain.Entities
         public string NumeroSerie { get; set; } = string.Empty;
         public DateTime? FechaRegistro { get; set; } = DateTime.UtcNow;
 
-        // Navegación
+       
         public Producto? Producto { get; set; }
         public ICollection<MovimientoDetalleSerie> MovimientoDetalleSeries { get; set; } = new List<MovimientoDetalleSerie>();
     }

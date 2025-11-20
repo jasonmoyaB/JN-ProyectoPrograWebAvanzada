@@ -10,6 +10,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Infrastructure.Repositories
         Task<bool> UpdateAsync(Bodega bodega);
         Task<bool> ToggleActivoAsync(int bodegaId);
         Task<bool> ExistsAsync(int bodegaId);
+        Task<bool> DeleteAsync(int bodegaId);
     }
 }
 

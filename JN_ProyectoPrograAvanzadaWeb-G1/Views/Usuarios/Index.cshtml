@@ -1,0 +1,120 @@
+@model List<JN_ProyectoPrograAvanzadaWeb_G1.Application.DTOs.Usuarios.UsuarioDto>
+@{
+    ViewData["Title"] = "Catálogo de Usuarios";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h2 class="mb-0 text-secondary">
+            <i class="bi bi-people me-2"></i>Catálogo de Usuarios
+        </h2>
+        <div>
+            <a asp-action="Crear" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i>Nuevo Usuario
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="mb-3">
+                <form method="get" class="d-flex gap-2">
+                    <select name="activo" class="form-select" style="width: auto;">
+                        <option value="">Todos</option>
+                        <option value="true" selected="@(ViewBag.FiltroActivo == true)">Activos</option>
+                        <option value="false" selected="@(ViewBag.FiltroActivo == false)">Inactivos</option>
+                    </select>
+                    <button type="submit" class="btn btn-outline-secondary">Filtrar</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Limpiar</a>
+                </form>
+            </div>
+
+            <table id="tablaUsuarios" class="table table-sm table-hover align-middle">
+                <thead class="table-light">
+                    <tr class="text-muted">
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Correo Electrónico</th>
+                        <th>Rol</th>
+                        <th>Bodega</th>
+                        <th>Estado</th>
+                        <th>Fecha Registro</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var usuario in Model)
+                    {
+                        <tr>
+                            <td>@usuario.UsuarioID</td>
+                            <td><strong>@usuario.Nombre</strong></td>
+                            <td>@usuario.CorreoElectronico</td>
+                            <td>
+                                <span class="badge bg-primary">@usuario.RolNombre</span>
+                            </td>
+                            <td>@(usuario.BodegaNombre ?? "-")</td>
+                            <td>
+                                <span class="badge rounded-pill @(usuario.Activo ? "bg-success" : "bg-secondary")">
+                                    @(usuario.Activo ? "Activo" : "Inactivo")
+                                </span>
+                            </td>
+                            <td>@usuario.FechaRegistro.ToString("dd/MM/yyyy")</td>
+                            <td class="text-center">
+                                <a asp-action="Editar" asp-route-id="@usuario.UsuarioID" class="btn btn-sm btn-outline-primary me-1" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form asp-action="ToggleActivo" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@usuario.UsuarioID" />
+                                    <button type="submit" class="btn btn-sm btn-outline-@(usuario.Activo ? "warning" : "success")" title="@(usuario.Activo ? "Desactivar" : "Activar")">
+                                        <i class="bi bi-@(usuario.Activo ? "x-circle" : "check-circle")"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#tablaUsuarios').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                },
+                pageLength: 10,
+                lengthChange: true,
+                ordering: true,
+                responsive: true
+            });
+        });
+    </script>
+}
+
+
