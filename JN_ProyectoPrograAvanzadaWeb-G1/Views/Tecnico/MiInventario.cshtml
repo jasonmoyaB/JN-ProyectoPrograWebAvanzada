@@ -1,0 +1,119 @@
+@model List<JN_ProyectoPrograAvanzadaWeb_G1.Application.DTOs.Inventario.SaldoInventarioDto>
+@{
+    ViewData["Title"] = "Mi Inventario";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h2 class="mb-0 text-secondary">
+            <i class="bi bi-box-seam me-2"></i>Mi Inventario - @ViewBag.BodegaNombre
+        </h2>
+        <div>
+            <a asp-action="Dashboard" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Volver al Dashboard
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="mb-3">
+                <input type="text" id="searchInput" class="form-control" placeholder="Buscar por SKU o nombre..." />
+            </div>
+
+            <table id="tablaInventario" class="table table-sm table-hover align-middle">
+                <thead class="table-light">
+                    <tr class="text-muted">
+                        <th>SKU</th>
+                        <th>Producto</th>
+                        <th class="text-end">Cantidad</th>
+                        <th class="text-end">Stock Mínimo</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><strong>@item.ProductoSKU</strong></td>
+                            <td>@item.ProductoNombre</td>
+                            <td class="text-end">
+                                <span class="fw-bold">@item.Cantidad.ToString("N2")</span>
+                            </td>
+                            <td class="text-end">
+                                @if (item.StockMinimo.HasValue)
+                                {
+                                    <span>@item.StockMinimo.Value.ToString("N2")</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.AlertaStockBajo)
+                                {
+                                    <span class="badge bg-warning">
+                                        <i class="bi bi-exclamation-triangle me-1"></i>Stock Bajo
+                                    </span>
+                                }
+                                else if (item.Cantidad > 0)
+                                {
+                                    <span class="badge bg-success">Disponible</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Sin Stock</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var table = $('#tablaInventario').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                },
+                pageLength: 15,
+                lengthChange: true,
+                ordering: true,
+                responsive: true,
+                order: [[1, 'asc']]
+            });
+
+            $('#searchInput').on('keyup', function () {
+                table.search(this.value).draw();
+            });
+        });
+    </script>
+}
+

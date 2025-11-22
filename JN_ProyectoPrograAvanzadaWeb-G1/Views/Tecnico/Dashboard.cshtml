@@ -179,10 +179,10 @@
         $(document).ready(function () {
             var bodegaId = @(ViewBag.BodegaID ?? 0);
 
-            $('#totalProductosBodega').text('0');
-            $('#stockBajo').text('0');
-            $('#misSolicitudes').text('0');
-            $('#movimientosHoy').text('0');
+            $('#totalProductosBodega').text('@(ViewBag.TotalProductos ?? 0)');
+            $('#stockBajo').text('@(ViewBag.StockBajo ?? 0)');
+            $('#misSolicitudes').text('@(ViewBag.MisSolicitudes ?? 0)');
+            $('#movimientosHoy').text('@(ViewBag.MovimientosHoy ?? 0)');
         });
     </script>
 }

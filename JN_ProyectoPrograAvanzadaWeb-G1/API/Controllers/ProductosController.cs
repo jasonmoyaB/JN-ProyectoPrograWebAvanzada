@@ -59,7 +59,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.API.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-                var productoId = await _productoService.CreateAsyn(dto);
+                var productoId = await _productoService.CreateAsync(dto);
                 var producto = await _productoService.GetByIdAsync(productoId);
                 return CreatedAtAction(nameof(GetById), new { id = productoId }, producto);
             }

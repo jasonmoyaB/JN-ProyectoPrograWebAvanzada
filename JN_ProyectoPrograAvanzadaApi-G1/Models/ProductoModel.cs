@@ -2,13 +2,9 @@
 {
     public class ProductoModel
     {
-        
-        public string Sku { get; set; } = string.Empty;
-
+        public int ProductoID { get; set; }
+        public string SKU { get; set; } = string.Empty;
         public string Nombre { get; set; } = string.Empty;
-
         public bool EsSerializado { get; set; }
-
-
     }
 }

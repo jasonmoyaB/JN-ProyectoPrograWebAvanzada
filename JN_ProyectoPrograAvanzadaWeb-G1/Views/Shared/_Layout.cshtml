@@ -153,30 +153,16 @@
                             <div class="sb-sidenav-menu-heading">Operaciones</div>
                             
                             <!-- Inventario -->
-                            <a class="nav-link" href="/Inventario/MiBodega">
+                            <a class="nav-link" asp-controller="Tecnico" asp-action="MiInventario">
                                 <div class="sb-nav-link-icon"><i class="bi bi-clipboard-data"></i></div>
                                 Mi Inventario
                             </a>
 
                             <!-- Movimientos -->
-                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseMovimientosTecnico">
+                            <a class="nav-link" asp-controller="Tecnico" asp-action="Movimientos">
                                 <div class="sb-nav-link-icon"><i class="bi bi-arrow-left-right"></i></div>
                                 Movimientos
-                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                             </a>
-                            <div class="collapse" id="collapseMovimientosTecnico" data-bs-parent="#sidenavAccordion">
-                                <nav class="sb-sidenav-menu-nested nav">
-                                    <a class="nav-link" href="/Movimientos/Entrada">
-                                        <i class="bi bi-box-arrow-in-down me-2"></i>Registrar Entrada
-                                    </a>
-                                    <a class="nav-link" href="/Movimientos/Salida">
-                                        <i class="bi bi-box-arrow-up me-2"></i>Registrar Salida
-                                    </a>
-                                    <a class="nav-link" href="/Movimientos/Historial">
-                                        <i class="bi bi-clock-history me-2"></i>Historial
-                                    </a>
-                                </nav>
-                            </div>
 
                             <!-- Solicitudes -->
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseSolicitudesTecnico">
@@ -186,10 +172,10 @@
                             </a>
                             <div class="collapse" id="collapseSolicitudesTecnico" data-bs-parent="#sidenavAccordion">
                                 <nav class="sb-sidenav-menu-nested nav">
-                                    <a class="nav-link" href="/Solicitudes/Crear">
+                                    <a class="nav-link" asp-controller="Tecnico" asp-action="CrearSolicitud">
                                         <i class="bi bi-plus-circle me-2"></i>Crear Solicitud
                                     </a>
-                                    <a class="nav-link" href="/Solicitudes/MisSolicitudes">
+                                    <a class="nav-link" asp-controller="Tecnico" asp-action="Solicitudes">
                                         <i class="bi bi-list-check me-2"></i>Mis Solicitudes
                                     </a>
                                 </nav>

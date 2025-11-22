@@ -1,0 +1,110 @@
+@model List<JN_ProyectoPrograAvanzadaWeb_G1.Application.DTOs.Movimientos.MovimientoDto>
+@{
+    ViewData["Title"] = "Mis Movimientos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h2 class="mb-0 text-secondary">
+            <i class="bi bi-arrow-left-right me-2"></i>Mis Movimientos - @ViewBag.BodegaNombre
+        </h2>
+        <div>
+            <a asp-action="Dashboard" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Volver al Dashboard
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Fecha Desde</label>
+                    <input type="date" name="fechaDesde" class="form-control" value="@(ViewBag.FechaDesde?.ToString("yyyy-MM-dd"))" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Fecha Hasta</label>
+                    <input type="date" name="fechaHasta" class="form-control" value="@(ViewBag.FechaHasta?.ToString("yyyy-MM-dd"))" />
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="bi bi-search me-1"></i>Filtrar
+                    </button>
+                    <a asp-action="Movimientos" class="btn btn-outline-secondary">Limpiar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <table id="tablaMovimientos" class="table table-sm table-hover align-middle">
+                <thead class="table-light">
+                    <tr class="text-muted">
+                        <th>ID</th>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th>Referencia</th>
+                        <th>Observaciones</th>
+                        <th>Usuario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var movimiento in Model)
+                    {
+                        <tr>
+                            <td>@movimiento.MovimientoID</td>
+                            <td>@movimiento.FechaMovimientoUTC.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <span class="badge bg-info">@movimiento.TipoMovimientoCodigo</span>
+                            </td>
+                            <td>@(movimiento.Referencia ?? "-")</td>
+                            <td>@(movimiento.Observaciones ?? "-")</td>
+                            <td>@movimiento.UsuarioNombre</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#tablaMovimientos').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                },
+                pageLength: 15,
+                lengthChange: true,
+                ordering: true,
+                responsive: true,
+                order: [[1, 'desc']]
+            });
+        });
+    </script>
+}
+
