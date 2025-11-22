@@ -12,6 +12,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Infrastructure.Repositories
         Task<bool> UpdateAsync(Producto producto);
         Task<bool> ToggleActivoAsync(int productoId);
         Task<bool> ExistsAsync(int productoId);
+        Task<bool> DeleteAsync(int productoId);
     }
 }
 

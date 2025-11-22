@@ -19,6 +19,12 @@
     <link href="~/css/styles.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 </head>
 <body class="sb-nav-fixed">
     <!-- Top Navbar -->
@@ -91,13 +97,13 @@
                             </a>
                             <div class="collapse" id="collapseCatalogos" data-bs-parent="#sidenavAccordion">
                                 <nav class="sb-sidenav-menu-nested nav">
-                                    <a class="nav-link" href="/Bodegas">
+                                    <a class="nav-link" asp-controller="Bodegas" asp-action="Index">
                                         <i class="bi bi-building me-2"></i>Bodegas
                                     </a>
-                                    <a class="nav-link" href="/Productos">
+                                    <a class="nav-link" asp-controller="Productos" asp-action="Index">
                                         <i class="bi bi-box-seam me-2"></i>Productos
                                     </a>
-                                    <a class="nav-link" href="/Usuarios">
+                                    <a class="nav-link" asp-controller="Usuarios" asp-action="Index">
                                         <i class="bi bi-people me-2"></i>Usuarios
                                     </a>
                                 </nav>
@@ -131,7 +137,9 @@
                             </a>
                             <div class="collapse" id="collapseReportes" data-bs-parent="#sidenavAccordion">
                                 <nav class="sb-sidenav-menu-nested nav">
-                                    <a class="nav-link" href="/Dashboard/Reportes">
+                                    <a class="nav-link"
+                                       asp-controller="Auditoria"
+                                       asp-action="ReportesKPI">
                                         <i class="bi bi-graph-up me-2"></i>Reportes y KPIs
                                     </a>
                                     <a class="nav-link" href="/Auditoria">
@@ -145,30 +153,16 @@
                             <div class="sb-sidenav-menu-heading">Operaciones</div>
                             
                             <!-- Inventario -->
-                            <a class="nav-link" href="/Inventario/MiBodega">
+                            <a class="nav-link" asp-controller="Tecnico" asp-action="MiInventario">
                                 <div class="sb-nav-link-icon"><i class="bi bi-clipboard-data"></i></div>
                                 Mi Inventario
                             </a>
 
                             <!-- Movimientos -->
-                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseMovimientosTecnico">
+                            <a class="nav-link" asp-controller="Tecnico" asp-action="Movimientos">
                                 <div class="sb-nav-link-icon"><i class="bi bi-arrow-left-right"></i></div>
                                 Movimientos
-                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                             </a>
-                            <div class="collapse" id="collapseMovimientosTecnico" data-bs-parent="#sidenavAccordion">
-                                <nav class="sb-sidenav-menu-nested nav">
-                                    <a class="nav-link" href="/Movimientos/Entrada">
-                                        <i class="bi bi-box-arrow-in-down me-2"></i>Registrar Entrada
-                                    </a>
-                                    <a class="nav-link" href="/Movimientos/Salida">
-                                        <i class="bi bi-box-arrow-up me-2"></i>Registrar Salida
-                                    </a>
-                                    <a class="nav-link" href="/Movimientos/Historial">
-                                        <i class="bi bi-clock-history me-2"></i>Historial
-                                    </a>
-                                </nav>
-                            </div>
 
                             <!-- Solicitudes -->
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseSolicitudesTecnico">
@@ -178,10 +172,10 @@
                             </a>
                             <div class="collapse" id="collapseSolicitudesTecnico" data-bs-parent="#sidenavAccordion">
                                 <nav class="sb-sidenav-menu-nested nav">
-                                    <a class="nav-link" href="/Solicitudes/Crear">
+                                    <a class="nav-link" asp-controller="Tecnico" asp-action="CrearSolicitud">
                                         <i class="bi bi-plus-circle me-2"></i>Crear Solicitud
                                     </a>
-                                    <a class="nav-link" href="/Solicitudes/MisSolicitudes">
+                                    <a class="nav-link" asp-controller="Tecnico" asp-action="Solicitudes">
                                         <i class="bi bi-list-check me-2"></i>Mis Solicitudes
                                     </a>
                                 </nav>
@@ -228,6 +222,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+
     <script src="~/js/scripts.js"></script>
     <script src="~/js/site.js"></script>
     <script>

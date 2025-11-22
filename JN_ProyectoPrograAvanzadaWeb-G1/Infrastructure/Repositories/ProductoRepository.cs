@@ -122,6 +122,26 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Infrastructure.Repositories
 
             return count > 0;
         }
+
+        public async Task<bool> DeleteAsync(int productoId)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+
+            try
+            {
+                var rowsAffected = await connection.ExecuteAsync(
+                    "inv.sp_Producto_Delete",
+                    new { ProductoID = productoId },
+                    commandType: CommandType.StoredProcedure);
+
+                return rowsAffected > 0;
+            }
+            catch (Exception)
+            {
+                
+                throw;
+            }
+        }
     }
 }
 

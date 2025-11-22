@@ -1,0 +1,109 @@
+@model List<JN_ProyectoPrograAvanzadaWeb_G1.Application.DTOs.Solicitudes.SolicitudDto>
+@{
+    ViewData["Title"] = "Mis Solicitudes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h2 class="mb-0 text-secondary">
+            <i class="bi bi-clipboard-check me-2"></i>Mis Solicitudes
+        </h2>
+        <div>
+            <a asp-action="CrearSolicitud" class="btn btn-primary me-2">
+                <i class="bi bi-plus-circle me-1"></i>Nueva Solicitud
+            </a>
+            <a asp-action="Dashboard" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Volver al Dashboard
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <table id="tablaSolicitudes" class="table table-sm table-hover align-middle">
+                <thead class="table-light">
+                    <tr class="text-muted">
+                        <th>ID</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Bodega</th>
+                        <th>Productos</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var solicitud in Model)
+                    {
+                        <tr>
+                            <td>@solicitud.SolicitudID</td>
+                            <td>@solicitud.FechaCreacionUTC.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                @{
+                                    var estadoClass = solicitud.EstadoCodigo switch
+                                    {
+                                        "Pendiente" => "bg-warning",
+                                        "Aprobada" => "bg-info",
+                                        "Enviada" => "bg-primary",
+                                        "Entregada" => "bg-success",
+                                        "Rechazada" => "bg-danger",
+                                        _ => "bg-secondary"
+                                    };
+                                }
+                                <span class="badge @estadoClass">@solicitud.EstadoCodigo</span>
+                            </td>
+                            <td>@solicitud.BodegaNombre</td>
+                            <td>
+                                <span class="badge bg-secondary">@solicitud.Detalles.Count producto(s)</span>
+                            </td>
+                            <td>
+                                <a asp-action="DetalleSolicitud" asp-route-id="@solicitud.SolicitudID" class="btn btn-sm btn-outline-primary" title="Ver Detalle">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#tablaSolicitudes').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                },
+                pageLength: 15,
+                lengthChange: true,
+                ordering: true,
+                responsive: true,
+                order: [[1, 'desc']]
+            });
+        });
+    </script>
+}
+

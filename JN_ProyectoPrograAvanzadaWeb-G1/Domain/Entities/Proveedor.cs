@@ -9,7 +9,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Domain.Entities
         public string? Email { get; set; }
         public bool Activo { get; set; } = true;
 
-        // Navegación
+       
         public ICollection<Movimiento> Movimientos { get; set; } = new List<Movimiento>();
     }
 }

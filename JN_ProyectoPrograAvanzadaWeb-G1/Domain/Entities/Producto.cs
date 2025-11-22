@@ -10,7 +10,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Domain.Entities
         public bool Activo { get; set; } = true;
         public DateTime? FechaCreacion { get; set; } = DateTime.UtcNow;
 
-        // Navegación
+      
         public ICollection<MovimientoDetalle> MovimientoDetalles { get; set; } = new List<MovimientoDetalle>();
         public ICollection<SolicitudDetalle> SolicitudDetalles { get; set; } = new List<SolicitudDetalle>();
         public ICollection<Serie> Series { get; set; } = new List<Serie>();

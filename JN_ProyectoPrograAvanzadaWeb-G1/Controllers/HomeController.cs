@@ -16,7 +16,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            // Si el usuario ya está autenticado, redirigir según su rol
+            
             var rolId = HttpContext.Session.GetInt32("RolID");
             if (rolId.HasValue)
             {

@@ -11,11 +11,12 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Data
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Rol> Roles { get; set; }
 
+        public DbSet<AuditLog> AuditLogs { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            
             modelBuilder.HasDefaultSchema("inv");
 
             modelBuilder.Entity<Rol>(entity =>
@@ -37,6 +38,28 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Data
                 entity.Property(e => e.FechaRegistro).HasDefaultValueSql("SYSUTCDATETIME()");
                 entity.Property(e => e.Activo).HasDefaultValue(true);
             });
+
+            modelBuilder.Entity<AuditLog>(entity =>
+            {
+                entity.ToTable("Auditoria", "inv");  
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Username).HasMaxLength(100);
+                entity.Property(e => e.ActionType).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.EntityName).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.EntityId).HasMaxLength(100);
+                entity.Property(e => e.IpAddress).HasMaxLength(45);
+                entity.Property(e => e.Source).HasMaxLength(50);
+
+                entity.Property(e => e.BeforeState).HasColumnType("nvarchar(max)");
+                entity.Property(e => e.AfterState).HasColumnType("nvarchar(max)");
+                entity.Property(e => e.Meta).HasColumnType("nvarchar(max)");
+
+                entity.HasIndex(e => e.OccurredAt);
+                entity.HasIndex(e => e.Username);
+                entity.HasIndex(e => new { e.EntityName, e.EntityId });
+            });
+
         }
     }
 }

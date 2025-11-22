@@ -37,14 +37,48 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Infrastructure.Repositories
             
             string emailNormalized = email?.Trim().ToLowerInvariant() ?? string.Empty;
 
-            var usuario = await connection.QueryAsync<DomainUsuario, DomainRol, DomainUsuario>(
+            var result = await connection.QueryAsync(
                 "inv.sp_Usuario_GetByEmail",
-                (u, r) => { u.Rol = r; return u; },
                 new { Email = emailNormalized },
-                commandType: CommandType.StoredProcedure,
-                splitOn: "RolID");
+                commandType: CommandType.StoredProcedure);
 
-            return usuario.FirstOrDefault();
+            var firstRow = result.FirstOrDefault() as dynamic;
+            
+            if (firstRow == null)
+                return null;
+
+            var usuario = new DomainUsuario
+            {
+                UsuarioID = (int)firstRow.UsuarioID,
+                Nombre = (string)firstRow.Nombre,
+                CorreoElectronico = (string)firstRow.CorreoElectronico,
+                ContrasenaHash = (string)firstRow.ContrasenaHash,
+                RolID = (int)firstRow.RolID,
+                Activo = (bool)firstRow.Activo,
+                FechaRegistro = (DateTime)firstRow.FechaRegistro,
+                BodegaID = firstRow.BodegaID != null ? (int?)firstRow.BodegaID : null
+            };
+
+            if (firstRow.Rol_RolID != null)
+            {
+                usuario.Rol = new DomainRol
+                {
+                    RolID = (int)firstRow.Rol_RolID,
+                    NombreRol = (string)firstRow.Rol_NombreRol
+                };
+            }
+
+            if (firstRow.Bodega_BodegaID != null && firstRow.Bodega_Nombre != null)
+            {
+                usuario.Bodega = new DomainBodega
+                {
+                    BodegaID = (int)firstRow.Bodega_BodegaID,
+                    Nombre = (string)firstRow.Bodega_Nombre,
+                    Activo = firstRow.Bodega_Activo != null ? (bool)firstRow.Bodega_Activo : true
+                };
+            }
+
+            return usuario;
         }
 
         public async Task<DomainUsuario?> GetByEmailAndPasswordHashAsync(string email, string passwordHash)
