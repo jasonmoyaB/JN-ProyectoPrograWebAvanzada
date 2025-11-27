@@ -10,8 +10,11 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Data
 
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Rol> Roles { get; set; }
+        public DbSet<Producto> Productos { get; set; }
+        public DbSet<Bodega> Bodegas { get; set; }
 
         public DbSet<AuditLog> AuditLogs { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
