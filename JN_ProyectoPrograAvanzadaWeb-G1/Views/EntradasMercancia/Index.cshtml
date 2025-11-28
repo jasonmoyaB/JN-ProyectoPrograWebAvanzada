@@ -1,0 +1,123 @@
+﻿@model IEnumerable<JN_ProyectoPrograAvanzadaWeb_G1.Models.EntradaMercancia>
+
+@{
+    ViewData["Title"] = "Entradas de Mercancía";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+
+<div class="container-fluid px-4">
+
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h2 class="mb-0 text-secondary">
+            <i class="bi bi-box-seam me-2"></i>Entradas de Mercancía
+        </h2>
+
+        <a href="/EntradasMercancia/Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Nueva Entrada
+        </a>
+    </div>
+
+    <!-- Mensajes -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Card principal -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+
+            <table id="tablaEntradas" class="table table-sm table-hover align-middle">
+                <thead class="table-light">
+                    <tr class="text-muted">
+                        <th>Fecha</th>
+                        <th>Usuario</th>
+                        <th>Producto</th>
+                        <th>Bodega</th>
+                        <th>Cantidad</th>
+                        <th>Movimiento</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var e in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="badge bg-light text-dark">
+                                    @e.FechaEntrada.ToString("dd/MM/yyyy HH:mm")
+                                </span>
+                            </td>
+
+                            <td>@e.Usuario?.Nombre</td>
+                            <td><strong>@e.Producto?.Nombre</strong></td>
+                            <td>@e.Bodega?.Nombre</td>
+
+                            <td>
+                                <span class="badge bg-success text-light px-3">
+                                    @e.Cantidad
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="badge bg-info text-dark px-3">
+                                    @e.TipoMovimiento
+                                </span>
+                            </td>
+
+                            <td class="text-center">
+
+                                <a asp-controller="EntradasMercancia"
+                                   asp-action="Edit"
+                                   asp-route-id="@e.EntradaID"
+                                   class="btn btn-sm btn-outline-primary rounded-pill me-1 px-3 shadow-sm"
+                                   title="Editar">
+                                    <i class="bi bi-pencil-square"></i> Editar
+                                </a>
+
+                               
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#tablaEntradas').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                },
+                pageLength: 10,
+                responsive: true,
+                ordering: true
+            });
+        });
+    </script>
+}
