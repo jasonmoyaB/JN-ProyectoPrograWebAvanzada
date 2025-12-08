@@ -1,4 +1,4 @@
-@JN_ProyectoPrograAvanzadaApi_G1_HostAddress = http://localhost:5235
+@JN_ProyectoPrograAvanzadaApi_G1_HostAddress = http://localhost:5205
 
 GET {{JN_ProyectoPrograAvanzadaApi_G1_HostAddress}}/weatherforecast/
 Accept: application/json

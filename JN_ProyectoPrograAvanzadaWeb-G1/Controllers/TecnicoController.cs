@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using JN_ProyectoPrograAvanzadaWeb_G1.Application.Services;
+using JN_ProyectoPrograAvanzadaWeb_G1.Services;
 
 namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
 {
@@ -8,17 +8,17 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
     public class TecnicoController : Controller
     {
         private readonly ILogger<TecnicoController> _logger;
-        private readonly IInventarioService _inventarioService;
-        private readonly IMovimientoService _movimientoService;
-        private readonly ISolicitudService _solicitudService;
-        private readonly IProductoService _productoService;
+        private readonly IApiInventarioService _inventarioService;
+        private readonly IApiMovimientoService _movimientoService;
+        private readonly IApiSolicitudService _solicitudService;
+        private readonly IApiProductoService _productoService;
 
         public TecnicoController(
             ILogger<TecnicoController> logger,
-            IInventarioService inventarioService,
-            IMovimientoService movimientoService,
-            ISolicitudService solicitudService,
-            IProductoService productoService)
+            IApiInventarioService inventarioService,
+            IApiMovimientoService movimientoService,
+            IApiSolicitudService solicitudService,
+            IApiProductoService productoService)
         {
             _logger = logger;
             _inventarioService = inventarioService;
@@ -103,7 +103,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
 
                 var inventario = await _inventarioService.GetSaldoByBodegaAsync(bodegaId.Value);
                 ViewBag.BodegaNombre = HttpContext.Session.GetString("BodegaNombre") ?? "Mi Bodega";
-                return View(inventario ?? new List<Application.DTOs.Inventario.SaldoInventarioDto>());
+                return View(inventario ?? new List<SaldoInventarioDto>());
             }
             catch (Exception ex)
             {
@@ -136,7 +136,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
                 ViewBag.BodegaNombre = HttpContext.Session.GetString("BodegaNombre") ?? "Mi Bodega";
                 ViewBag.FechaDesde = fechaDesde;
                 ViewBag.FechaHasta = fechaHasta;
-                return View(movimientos ?? new List<Application.DTOs.Movimientos.MovimientoDto>());
+                return View(movimientos ?? new List<MovimientoDto>());
             }
             catch (Exception ex)
             {
@@ -167,7 +167,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
 
                 var solicitudes = await _solicitudService.GetByUsuarioAsync(usuarioId.Value);
                 ViewBag.BodegaNombre = HttpContext.Session.GetString("BodegaNombre") ?? "Mi Bodega";
-                return View(solicitudes ?? new List<Application.DTOs.Solicitudes.SolicitudDto>());
+                return View(solicitudes ?? new List<SolicitudDto>());
             }
             catch (Exception ex)
             {
@@ -197,10 +197,10 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
                 }
 
                 var productos = await _productoService.GetAllAsync(true);
-                ViewBag.Productos = productos ?? new List<Application.DTOs.Productos.ProductoDto>();
+                ViewBag.Productos = productos ?? new List<ProductoDto>();
                 ViewBag.BodegaID = bodegaId.Value;
                 ViewBag.BodegaNombre = HttpContext.Session.GetString("BodegaNombre") ?? "Mi Bodega";
-                return View(new Application.DTOs.Solicitudes.CrearSolicitudDto { BodegaID = bodegaId.Value });
+                return View(new CrearSolicitudDto { BodegaID = bodegaId.Value });
             }
             catch (Exception ex)
             {
@@ -213,7 +213,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
         // POST: Tecnico/Solicitudes/Crear
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CrearSolicitud(Application.DTOs.Solicitudes.CrearSolicitudDto dto)
+        public async Task<IActionResult> CrearSolicitud(CrearSolicitudDto dto)
         {
             try
             {
@@ -233,7 +233,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
                 if (!ModelState.IsValid)
                 {
                     var productos = await _productoService.GetAllAsync(true);
-                    ViewBag.Productos = productos ?? new List<Application.DTOs.Productos.ProductoDto>();
+                    ViewBag.Productos = productos ?? new List<ProductoDto>();
                     ViewBag.BodegaID = dto.BodegaID;
                     ViewBag.BodegaNombre = HttpContext.Session.GetString("BodegaNombre") ?? "Mi Bodega";
                     return View(dto);
@@ -250,11 +250,11 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
                 try
                 {
                     var productos = await _productoService.GetAllAsync(true);
-                    ViewBag.Productos = productos ?? new List<Application.DTOs.Productos.ProductoDto>();
+                    ViewBag.Productos = productos ?? new List<ProductoDto>();
                 }
                 catch
                 {
-                    ViewBag.Productos = new List<Application.DTOs.Productos.ProductoDto>();
+                    ViewBag.Productos = new List<ProductoDto>();
                 }
                 ViewBag.BodegaID = dto.BodegaID;
                 ViewBag.BodegaNombre = HttpContext.Session.GetString("BodegaNombre") ?? "Mi Bodega";

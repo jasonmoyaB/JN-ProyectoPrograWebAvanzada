@@ -1,4 +1,4 @@
-@model List<JN_ProyectoPrograAvanzadaWeb_G1.Application.DTOs.Bodegas.BodegaDto>
+@model List<JN_ProyectoPrograAvanzadaWeb_G1.Services.BodegaDto>
 @{
     ViewData["Title"] = "Catálogo de Bodegas";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -71,7 +71,7 @@
                                     @(bodega.Activo ? "Activo" : "Inactivo")
                                 </span>
                             </td>
-                            <td>@(bodega.FechaCreacion?.ToString("dd/MM/yyyy") ?? "-")</td>
+                            <td>@bodega.FechaCreacion.ToString("dd/MM/yyyy")</td>
                             <td class="text-center">
                                 <a asp-action="Editar" asp-route-id="@bodega.BodegaID" class="btn btn-sm btn-outline-primary me-1" title="Editar">
                                     <i class="bi bi-pencil"></i>
@@ -81,13 +81,6 @@
                                     <input type="hidden" name="id" value="@bodega.BodegaID" />
                                     <button type="submit" class="btn btn-sm btn-outline-@(bodega.Activo ? "warning" : "success")" title="@(bodega.Activo ? "Desactivar" : "Activar")">
                                         <i class="bi bi-@(bodega.Activo ? "x-circle" : "check-circle")"></i>
-                                    </button>
-                                </form>
-                                <form asp-action="Eliminar" method="post" class="d-inline" onsubmit="return confirmarEliminacion('@bodega.Nombre');">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="@bodega.BodegaID" />
-                                    <button type="submit" class="btn btn-sm btn-outline-danger ms-1" title="Eliminar">
-                                        <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
                             </td>
@@ -115,10 +108,6 @@
                 responsive: true
             });
         });
-
-        function confirmarEliminacion(nombre) {
-            return confirm('¿Está seguro que desea eliminar la bodega "' + nombre + '"?\n\nEsta acción no se puede deshacer.');
-        }
     </script>
 }
 

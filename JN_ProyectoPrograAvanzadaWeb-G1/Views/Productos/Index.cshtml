@@ -1,4 +1,4 @@
-@model List<JN_ProyectoPrograAvanzadaWeb_G1.Application.DTOs.Productos.ProductoDto>
+@model List<JN_ProyectoPrograAvanzadaWeb_G1.Services.ProductoDto>
 @{
     ViewData["Title"] = "Catálogo de Productos";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -87,7 +87,7 @@
                                     @(producto.Activo ? "Activo" : "Inactivo")
                                 </span>
                             </td>
-                            <td>@(producto.FechaCreacion?.ToString("dd/MM/yyyy") ?? "-")</td>
+                            <td>@producto.FechaCreacion.ToString("dd/MM/yyyy")</td>
                             <td class="text-center">
                                 <a asp-action="Editar" asp-route-id="@producto.ProductoID" class="btn btn-sm btn-outline-primary me-1" title="Editar">
                                     <i class="bi bi-pencil"></i>

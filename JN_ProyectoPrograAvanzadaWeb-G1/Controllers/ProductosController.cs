@@ -1,5 +1,4 @@
-using JN_ProyectoPrograAvanzadaWeb_G1.Application.DTOs.Productos;
-using JN_ProyectoPrograAvanzadaWeb_G1.Application.Services;
+using JN_ProyectoPrograAvanzadaWeb_G1.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,10 +7,10 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
     [Authorize]
     public class ProductosController : Controller
     {
-        private readonly IProductoService _productoService;
+        private readonly IApiProductoService _productoService;
         private readonly ILogger<ProductosController> _logger;
 
-        public ProductosController(IProductoService productoService, ILogger<ProductosController> logger)
+        public ProductosController(IApiProductoService productoService, ILogger<ProductosController> logger)
         {
             _productoService = productoService;
             _logger = logger;

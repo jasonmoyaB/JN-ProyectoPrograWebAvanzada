@@ -1,19 +1,36 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 using JN_ProyectoPrograAvanzadaWeb_G1.Data;
-using JN_ProyectoPrograAvanzadaWeb_G1.Infrastructure.Data;
-using JN_ProyectoPrograAvanzadaWeb_G1.Infrastructure.Repositories;
-using JN_ProyectoPrograAvanzadaWeb_G1.Application.Services;
+using JN_ProyectoPrograAvanzadaWeb_G1.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
+// HTTP Client para consumir el API
+builder.Services.AddHttpClient("ApiClient", client =>
+{
+    var apiUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7001";
+    client.BaseAddress = new Uri(apiUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
+// ApplicationDbContext se mantiene solo si es necesario para migraciones o operaciones específicas
+// La lógica de negocio debe consumirse desde el API
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
 builder.Services.AddHttpContextAccessor();
+
+// Registrar servicios HTTP client para consumir el API
+builder.Services.AddScoped<IApiAuthService, ApiAuthService>();
+builder.Services.AddScoped<IApiUsuarioService, ApiUsuarioService>();
+builder.Services.AddScoped<IApiProductoService, ApiProductoService>();
+builder.Services.AddScoped<IApiBodegaService, ApiBodegaService>();
+builder.Services.AddScoped<IApiRolService, ApiRolService>();
+builder.Services.AddScoped<IApiInventarioService, ApiInventarioService>();
+builder.Services.AddScoped<IApiMovimientoService, ApiMovimientoService>();
+builder.Services.AddScoped<IApiSolicitudService, ApiSolicitudService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -45,29 +62,6 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
-
-builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-builder.Services.AddScoped<IRolRepository, RolRepository>();
-builder.Services.AddScoped<IBodegaRepository, BodegaRepository>();
-builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
-builder.Services.AddScoped<IInventarioRepository, InventarioRepository>();
-builder.Services.AddScoped<IMovimientoRepository, MovimientoRepository>();
-builder.Services.AddScoped<ISolicitudRepository, SolicitudRepository>();
-builder.Services.AddScoped<IAuditoriaRepository, AuditoriaRepository>();
-builder.Services.AddScoped<IBitacoraErroresRepository, BitacoraErroresRepository>();
-
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IBodegaService, BodegaService>();
-builder.Services.AddScoped<IProductoService, ProductoService>();
-builder.Services.AddScoped<IUsuarioService, UsuarioService>();
-builder.Services.AddScoped<IInventarioService, InventarioService>();
-builder.Services.AddScoped<IMovimientoService, MovimientoService>();
-builder.Services.AddScoped<ISolicitudService, SolicitudService>();
-
-
-
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 

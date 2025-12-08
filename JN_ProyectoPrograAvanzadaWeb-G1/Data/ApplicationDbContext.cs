@@ -10,8 +10,12 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Data
 
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Rol> Roles { get; set; }
-
+        public DbSet<Producto> Productos { get; set; }
+        public DbSet<Bodega> Bodegas { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<EntradaMercancia> EntradasMercancia { get; set; }
+        
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -19,6 +23,46 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Data
 
             modelBuilder.HasDefaultSchema("inv");
 
+         
+            modelBuilder.Entity<EntradaMercancia>(entity =>
+            {
+                entity.ToTable("EntradasMercancia", "inv");
+
+             
+                entity.HasKey(e => e.EntradaID);
+
+              
+                entity.Property(e => e.FechaEntrada)
+                      .HasDefaultValueSql("SYSUTCDATETIME()");
+
+              
+                entity.Property(e => e.Cantidad)
+                      .HasColumnType("decimal(18,2)");
+
+                
+                entity.Property(e => e.TipoMovimiento)
+                      .HasMaxLength(20)
+                      .IsRequired();
+
+                
+                entity.HasOne(e => e.Usuario)
+                      .WithMany()
+                      .HasForeignKey(e => e.UsuarioID)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Producto)
+                      .WithMany()
+                      .HasForeignKey(e => e.ProductoID)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                
+                entity.HasOne(e => e.Bodega)
+                      .WithMany()
+                      .HasForeignKey(e => e.BodegaID)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+           
             modelBuilder.Entity<Rol>(entity =>
             {
                 entity.ToTable("Roles", "inv");
@@ -28,6 +72,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Data
                 );
             });
 
+          
             modelBuilder.Entity<Usuario>(entity =>
             {
                 entity.ToTable("Usuarios", "inv");
@@ -39,9 +84,10 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Data
                 entity.Property(e => e.Activo).HasDefaultValue(true);
             });
 
+          
             modelBuilder.Entity<AuditLog>(entity =>
             {
-                entity.ToTable("Auditoria", "inv");  
+                entity.ToTable("Auditoria", "inv");
                 entity.HasKey(e => e.Id);
 
                 entity.Property(e => e.Username).HasMaxLength(100);
@@ -59,7 +105,6 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Data
                 entity.HasIndex(e => e.Username);
                 entity.HasIndex(e => new { e.EntityName, e.EntityId });
             });
-
         }
     }
 }

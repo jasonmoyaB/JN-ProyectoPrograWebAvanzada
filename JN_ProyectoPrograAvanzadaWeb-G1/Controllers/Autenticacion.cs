@@ -1,26 +1,29 @@
-﻿using JN_ProyectoPrograAvanzadaWeb_G1.Application.DTOs.Auth;
-using JN_ProyectoPrograAvanzadaWeb_G1.Application.Services;
-using JN_ProyectoPrograAvanzadaWeb_G1.Data;
-using JN_ProyectoPrograAvanzadaWeb_G1.Helpers;
-using JN_ProyectoPrograAvanzadaWeb_G1.Models;
+﻿using JN_ProyectoPrograAvanzadaWeb_G1.Services;
 using JN_ProyectoPrograAvanzadaWeb_G1.Models.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 using System.Security.Claims;
 
 namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
 {
     public class AutenticacionController : Controller
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IAuthService _authService;
+        private readonly IApiAuthService _authService;
+        private readonly IApiUsuarioService _usuarioService;
+        private readonly IApiRolService _rolService;
+        private readonly ILogger<AutenticacionController> _logger;
 
-        public AutenticacionController(ApplicationDbContext context, IAuthService authService)
+        public AutenticacionController(
+            IApiAuthService authService,
+            IApiUsuarioService usuarioService,
+            IApiRolService rolService,
+            ILogger<AutenticacionController> logger)
         {
-            _context = context;
             _authService = authService;
+            _usuarioService = usuarioService;
+            _rolService = rolService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -127,40 +130,67 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Registrar(RegistroViewModel model)
+        public async Task<IActionResult> Registrar(RegistroViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 return View("Registro", model);
             }
 
-            if (_context.Usuarios.Any(u => u.CorreoElectronico == model.CorreoElectronico))
+            try
             {
-                ModelState.AddModelError("", "El correo ya está registrado.");
+                // Verificar si el correo ya existe
+                var usuarios = await _usuarioService.GetAllAsync();
+                if (usuarios.Any(u => u.CorreoElectronico == model.CorreoElectronico))
+                {
+                    ModelState.AddModelError("", "El correo ya está registrado.");
+                    return View("Registro", model);
+                }
+
+                // Obtener rol Técnico
+                var roles = await _rolService.GetAllAsync();
+                var tecnico = roles.FirstOrDefault(r => r.NombreRol == "Técnico" || r.NombreRol == "Tecnico");
+                if (tecnico == null)
+                {
+                    ModelState.AddModelError("", "No se encontró el rol 'Técnico'. Configura los roles en el sistema.");
+                    return View("Registro", model);
+                }
+
+                // Crear usuario a través del API
+                var crearUsuarioDto = new CrearUsuarioDto
+                {
+                    Nombre = model.Nombre,
+                    CorreoElectronico = model.CorreoElectronico,
+                    Contrasena = model.Contrasena,
+                    RolID = tecnico.RolID,
+                    BodegaID = null
+                };
+
+                var usuarioId = await _usuarioService.CreateAsync(crearUsuarioDto);
+                if (usuarioId > 0)
+                {
+                    TempData["Mensaje"] = "Usuario registrado correctamente.";
+                    return RedirectToAction(nameof(Login));
+                }
+                else
+                {
+                    _logger.LogWarning("CreateAsync retornó 0 para usuario: {Email}", model.CorreoElectronico);
+                    ModelState.AddModelError("", "Error al registrar el usuario. Verifique que el API esté ejecutándose y que los datos sean correctos.");
+                    return View("Registro", model);
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogError(ex, "Error de operación al registrar usuario");
+                ModelState.AddModelError("", ex.Message);
                 return View("Registro", model);
             }
-
-            var tecnico = _context.Roles.FirstOrDefault(r => r.NombreRol == "Técnico" || r.NombreRol == "Tecnico");
-            if (tecnico == null)
+            catch (Exception ex)
             {
-                ModelState.AddModelError("", "No se encontró el rol 'Técnico'. Configura los roles en el sistema.");
+                _logger.LogError(ex, "Error inesperado al registrar usuario: {Message}", ex.Message);
+                ModelState.AddModelError("", $"Error al registrar el usuario: {ex.Message}");
                 return View("Registro", model);
             }
-
-            var nuevo = new Usuario
-            {
-                Nombre = model.Nombre,
-                CorreoElectronico = model.CorreoElectronico,
-                ContrasenaHash = PasswordHelper.HashPassword(model.Contrasena),
-                RolID = tecnico.RolID,
-                Activo = true
-            };
-
-            _context.Usuarios.Add(nuevo);
-            _context.SaveChanges();
-
-            TempData["Mensaje"] = "Usuario registrado correctamente.";
-            return RedirectToAction(nameof(Login));
         }
         [HttpGet]
         public IActionResult RecuperarClave()
@@ -170,7 +200,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult RecuperarClave(RecuperarClaveViewModel model)
+        public async Task<IActionResult> RecuperarClave(RecuperarClaveViewModel model)
         {
             if (string.IsNullOrWhiteSpace(model.CorreoElectronico))
             {
@@ -178,21 +208,25 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
                 return View(model);
             }
 
-            var usuario = _context.Usuarios.FirstOrDefault(u => u.CorreoElectronico == model.CorreoElectronico);
-
-            if (usuario == null)
+            try
             {
-                ViewBag.Error = "No existe una cuenta con ese correo.";
+                var nuevaClave = await _authService.RecuperarClaveAsync(model.CorreoElectronico);
+                
+                if (string.IsNullOrEmpty(nuevaClave))
+                {
+                    ViewBag.Error = "No existe una cuenta con ese correo o hubo un error al generar la contraseña temporal.";
+                    return View(model);
+                }
+
+                TempData["Mensaje"] = $"Tu nueva contraseña temporal es: {nuevaClave}. Por favor cámbiala después de iniciar sesión.";
+                return RedirectToAction(nameof(Login));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al recuperar clave");
+                ViewBag.Error = "Error al recuperar la contraseña. Intente nuevamente.";
                 return View(model);
             }
-
-            string nuevaClave = Guid.NewGuid().ToString("N")[..8]; 
-            usuario.ContrasenaHash = PasswordHelper.HashPassword(nuevaClave);
-            _context.SaveChanges();
-
-            TempData["Mensaje"] = $"Tu nueva contraseña temporal es: {nuevaClave}. Por favor cámbiala después de iniciar sesión.";
-
-            return RedirectToAction(nameof(Login));
         }
 
         public IActionResult Logout()
