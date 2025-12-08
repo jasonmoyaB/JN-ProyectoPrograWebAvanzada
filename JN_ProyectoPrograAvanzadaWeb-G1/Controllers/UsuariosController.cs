@@ -184,32 +184,48 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
                     id, dto.Nombre, dto.RolID, dto.BodegaID, dto.Activo);
                 
                 var actualizado = await _usuarioService.UpdateAsync(id, dto);
+                
+
                 if (actualizado)
                 {
                     _logger.LogInformation("Usuario {Id} actualizado exitosamente, redirigiendo al catálogo", id);
                     TempData["Success"] = "Usuario actualizado exitosamente";
                     return RedirectToAction(nameof(Index));
                 }
-                else
-                {
-                    _logger.LogWarning("UpdateAsync retornó false para usuario {Id}", id);
-                    TempData["Error"] = "Error al actualizar el usuario. Verifique que el usuario exista y que los datos sean válidos.";
-                    await CargarListasDesplegables();
-                    return View(dto);
-                }
+                
+
+                _logger.LogWarning("UpdateAsync retornó false para usuario {Id} - Usuario no encontrado", id);
+                ModelState.AddModelError("", "El usuario no fue encontrado. Verifique que el usuario exista.");
+                TempData["Error"] = "Error al actualizar el usuario. El usuario no fue encontrado.";
+                await CargarListasDesplegables();
+                return View(dto);
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogError(ex, "Error de operación al actualizar usuario {Id}: {Message}", id, ex.Message);
+              
+                _logger.LogError(ex, "Error de validación al actualizar usuario {Id}: {Message}", id, ex.Message);
                 ModelState.AddModelError("", ex.Message);
                 TempData["Error"] = ex.Message;
                 await CargarListasDesplegables();
                 return View(dto);
             }
+            catch (HttpRequestException ex)
+            {
+                
+                _logger.LogError(ex, "Error de conexión al actualizar usuario {Id}: {Message}", id, ex.Message);
+                var errorMessage = "No se pudo conectar con el servidor. Verifique su conexión e intente nuevamente.";
+                ModelState.AddModelError("", errorMessage);
+                TempData["Error"] = errorMessage;
+                await CargarListasDesplegables();
+                return View(dto);
+            }
             catch (Exception ex)
             {
+                
                 _logger.LogError(ex, "Error inesperado al actualizar usuario {Id}: {Message}", id, ex.Message);
-                TempData["Error"] = $"Error al actualizar el usuario: {ex.Message}";
+                var errorMessage = "Error al actualizar el usuario. Por favor, intente nuevamente.";
+                ModelState.AddModelError("", errorMessage);
+                TempData["Error"] = errorMessage;
                 await CargarListasDesplegables();
                 return View(dto);
             }
@@ -228,20 +244,41 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
 
             try
             {
+                _logger.LogInformation("Cambiando estado de usuario {Id}", id);
+                
+                
+                var usuario = await _usuarioService.GetByIdAsync(id);
+                if (usuario == null)
+                {
+                    _logger.LogWarning("Usuario {Id} no encontrado al intentar cambiar estado", id);
+                    TempData["Error"] = "El usuario no fue encontrado";
+                    return RedirectToAction(nameof(Index));
+                }
+                
+                var estadoAnterior = usuario.Activo;
                 var actualizado = await _usuarioService.ToggleActivoAsync(id);
+                
                 if (!actualizado)
                 {
-                    TempData["Error"] = "Error al cambiar el estado del usuario";
+                    _logger.LogWarning("ToggleActivoAsync retornó false para usuario {Id}", id);
+                    TempData["Error"] = "Error al cambiar el estado del usuario. Verifique que el usuario exista.";
                 }
                 else
                 {
-                    TempData["Success"] = "Estado del usuario actualizado";
+                    var nuevoEstado = !estadoAnterior ? "activado" : "desactivado";
+                    _logger.LogInformation("Usuario {Id} {NuevoEstado} exitosamente", id, nuevoEstado);
+                    TempData["Success"] = $"Usuario {nuevoEstado} exitosamente";
                 }
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "Error de conexión al cambiar estado de usuario {Id}: {Message}", id, ex.Message);
+                TempData["Error"] = "No se pudo conectar con el servidor. Verifique su conexión e intente nuevamente.";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al cambiar estado de usuario: {Id}", id);
-                TempData["Error"] = "Error al cambiar el estado del usuario";
+                _logger.LogError(ex, "Error inesperado al cambiar estado de usuario {Id}: {Message}", id, ex.Message);
+                TempData["Error"] = "Error al cambiar el estado del usuario. Por favor, intente nuevamente.";
             }
 
             return RedirectToAction(nameof(Index));

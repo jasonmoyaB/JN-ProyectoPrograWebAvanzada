@@ -3,6 +3,7 @@ using JN_ProyectoPrograAvanzadaApi_G1.Domain.Entities;
 using JN_ProyectoPrograAvanzadaApi_G1.Helpers;
 using JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories;
 using DomainUsuario = JN_ProyectoPrograAvanzadaApi_G1.Domain.Entities.Usuario;
+using Microsoft.Extensions.Logging;
 
 namespace JN_ProyectoPrograAvanzadaApi_G1.Application.Services
 {
@@ -11,15 +12,18 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Application.Services
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IRolRepository _rolRepository;
         private readonly IBodegaRepository _bodegaRepository;
+        private readonly ILogger<UsuarioService> _logger;
 
         public UsuarioService(
             IUsuarioRepository usuarioRepository,
             IRolRepository rolRepository,
-            IBodegaRepository bodegaRepository)
+            IBodegaRepository bodegaRepository,
+            ILogger<UsuarioService> logger)
         {
             _usuarioRepository = usuarioRepository;
             _rolRepository = rolRepository;
             _bodegaRepository = bodegaRepository;
+            _logger = logger;
         }
 
         public async Task<List<UsuarioDto>> GetAllAsync(bool? activo = null)
@@ -101,12 +105,89 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Application.Services
             usuario.BodegaID = dto.BodegaID;
             usuario.Activo = dto.Activo;
 
-            return await _usuarioRepository.UpdateAsync(usuario);
+            var resultado = await _usuarioRepository.UpdateAsync(usuario);
+            
+            _logger.LogInformation("UsuarioService: UpdateAsync retornó {Resultado} para usuario {UsuarioId}", resultado, usuarioId);
+            
+            // Si el repositorio retorna false pero el usuario existe, verificar si realmente se actualizó
+            // Esto puede ocurrir si el stored procedure actualiza pero no retorna rowsAffected correctamente
+            if (!resultado)
+            {
+                _logger.LogWarning("UsuarioService: UpdateAsync retornó false, verificando si los datos se actualizaron realmente para usuario {UsuarioId}", usuarioId);
+                
+                // Verificar si los datos realmente cambiaron consultando nuevamente
+                var usuarioActualizado = await _usuarioRepository.GetByIdAsync(usuarioId);
+                if (usuarioActualizado != null)
+                {
+                    // Si los datos coinciden con lo que intentamos actualizar, considerar éxito
+                    if (usuarioActualizado.Nombre == dto.Nombre &&
+                        usuarioActualizado.CorreoElectronico == dto.CorreoElectronico &&
+                        usuarioActualizado.RolID == dto.RolID &&
+                        usuarioActualizado.BodegaID == dto.BodegaID &&
+                        usuarioActualizado.Activo == dto.Activo)
+                    {
+                        _logger.LogInformation("UsuarioService: Los datos se actualizaron correctamente aunque UpdateAsync retornó false. Retornando true para usuario {UsuarioId}", usuarioId);
+                        return true;
+                    }
+                    else
+                    {
+                        _logger.LogWarning("UsuarioService: Los datos no coinciden. Esperado: Nombre={Nombre}, RolID={RolID}, BodegaID={BodegaID}, Activo={Activo}. Actual: Nombre={NombreActual}, RolID={RolIDActual}, BodegaID={BodegaIDActual}, Activo={ActivoActual}",
+                            dto.Nombre, dto.RolID, dto.BodegaID, dto.Activo,
+                            usuarioActualizado.Nombre, usuarioActualizado.RolID, usuarioActualizado.BodegaID, usuarioActualizado.Activo);
+                    }
+                }
+                else
+                {
+                    _logger.LogError("UsuarioService: Usuario {UsuarioId} no encontrado después de UpdateAsync", usuarioId);
+                }
+            }
+            
+            return resultado;
         }
 
         public async Task<bool> ToggleActivoAsync(int usuarioId)
         {
-            return await _usuarioRepository.ToggleActivoAsync(usuarioId);
+            // Obtener el estado actual antes de cambiar
+            var usuario = await _usuarioRepository.GetByIdAsync(usuarioId);
+            if (usuario == null) return false;
+            
+            var estadoAnterior = usuario.Activo;
+            
+            // Intentar cambiar el estado
+            var resultado = await _usuarioRepository.ToggleActivoAsync(usuarioId);
+            
+            _logger.LogInformation("UsuarioService: ToggleActivoAsync retornó {Resultado} para usuario {UsuarioId}", resultado, usuarioId);
+            
+            // Si el repositorio retorna false pero el usuario existe, verificar si realmente se cambió
+            // Esto puede ocurrir si el stored procedure cambia el estado pero no retorna rowsAffected correctamente
+            if (!resultado)
+            {
+                _logger.LogWarning("UsuarioService: ToggleActivoAsync retornó false, verificando si el estado se cambió realmente para usuario {UsuarioId}", usuarioId);
+                
+                // Verificar si el estado realmente cambió consultando nuevamente
+                var usuarioActualizado = await _usuarioRepository.GetByIdAsync(usuarioId);
+                if (usuarioActualizado != null)
+                {
+                    // Si el estado cambió (de activo a inactivo o viceversa), considerar éxito
+                    if (usuarioActualizado.Activo != estadoAnterior)
+                    {
+                        _logger.LogInformation("UsuarioService: El estado se cambió correctamente aunque ToggleActivoAsync retornó false. Estado anterior: {EstadoAnterior}, Estado actual: {EstadoActual}. Retornando true para usuario {UsuarioId}", 
+                            estadoAnterior, usuarioActualizado.Activo, usuarioId);
+                        return true;
+                    }
+                    else
+                    {
+                        _logger.LogWarning("UsuarioService: El estado no cambió. Estado anterior: {EstadoAnterior}, Estado actual: {EstadoActual} para usuario {UsuarioId}",
+                            estadoAnterior, usuarioActualizado.Activo, usuarioId);
+                    }
+                }
+                else
+                {
+                    _logger.LogError("UsuarioService: Usuario {UsuarioId} no encontrado después de ToggleActivoAsync", usuarioId);
+                }
+            }
+            
+            return resultado;
         }
 
         public async Task<bool> AssignarBodegaAsync(int usuarioId, int? bodegaId)

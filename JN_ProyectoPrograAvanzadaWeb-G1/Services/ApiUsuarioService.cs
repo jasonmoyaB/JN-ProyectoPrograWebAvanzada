@@ -191,13 +191,48 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Services
         {
             try
             {
+                _logger.LogInformation("Intentando cambiar estado de usuario {Id}", id);
+                
                 var response = await _httpClient.PatchAsync($"api/usuarios/{id}/toggle-activo", null);
-                return response.IsSuccessStatusCode;
+                
+                var statusCode = response.StatusCode;
+                var statusCodeInt = (int)statusCode;
+                var responseContent = await response.Content.ReadAsStringAsync();
+                
+                _logger.LogInformation("Respuesta del API al cambiar estado de usuario - Status: {StatusCode} ({StatusCodeInt}), IsSuccessStatusCode: {IsSuccess}, Content: {Content}", 
+                    statusCode, statusCodeInt, response.IsSuccessStatusCode, responseContent);
+                
+                
+                if (response.IsSuccessStatusCode || 
+                    statusCode == System.Net.HttpStatusCode.OK || 
+                    (statusCodeInt >= 200 && statusCodeInt < 300))
+                {
+                    _logger.LogInformation("Estado de usuario {Id} cambiado exitosamente. Status: {StatusCode} ({StatusCodeInt})", id, statusCode, statusCodeInt);
+                    return true;
+                }
+                
+           
+                if (statusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    _logger.LogWarning("Usuario {Id} no encontrado en el API. Respuesta: {Content}", id, responseContent);
+                    return false;
+                }
+                
+                
+                _logger.LogError("Error al cambiar estado de usuario {Id}. Status: {StatusCode} ({StatusCodeInt}), Response: {ErrorContent}", 
+                    id, statusCode, statusCodeInt, responseContent);
+                return false;
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "Error de conexión al cambiar estado de usuario {Id}. Verifique que el API esté ejecutándose en {BaseUrl}", 
+                    id, _httpClient.BaseAddress);
+                throw new InvalidOperationException($"No se pudo conectar con el API en {_httpClient.BaseAddress}. Verifique que el servicio esté ejecutándose.", ex);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al cambiar estado de usuario {Id}", id);
-                return false;
+                _logger.LogError(ex, "Error inesperado al cambiar estado de usuario {Id}: {Message}", id, ex.Message);
+                throw;
             }
         }
     }
