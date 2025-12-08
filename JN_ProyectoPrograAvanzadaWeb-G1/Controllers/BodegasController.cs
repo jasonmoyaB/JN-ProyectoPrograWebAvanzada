@@ -1,5 +1,4 @@
-using JN_ProyectoPrograAvanzadaWeb_G1.Application.DTOs.Bodegas;
-using JN_ProyectoPrograAvanzadaWeb_G1.Application.Services;
+using JN_ProyectoPrograAvanzadaWeb_G1.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,10 +7,10 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
     [Authorize]
     public class BodegasController : Controller
     {
-        private readonly IBodegaService _bodegaService;
+        private readonly IApiBodegaService _bodegaService;
         private readonly ILogger<BodegasController> _logger;
 
-        public BodegasController(IBodegaService bodegaService, ILogger<BodegasController> logger)
+        public BodegasController(IApiBodegaService bodegaService, ILogger<BodegasController> logger)
         {
             _bodegaService = bodegaService;
             _logger = logger;
@@ -216,45 +215,6 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // POST: Bodegas/Eliminar
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Eliminar(int id)
-        {
-            var rolId = HttpContext.Session.GetInt32("RolID");
-            if (rolId != 1)
-            {
-                return RedirectToAction("Dashboard", "Tecnico");
-            }
-
-            try
-            {
-                
-                var existe = await _bodegaService.ExistsAsync(id);
-                if (!existe)
-                {
-                    TempData["Error"] = "La bodega no existe";
-                    return RedirectToAction(nameof(Index));
-                }
-
-                var eliminado = await _bodegaService.DeleteAsync(id);
-                if (!eliminado)
-                {
-                    TempData["Error"] = "No se pudo eliminar la bodega. Verifique que no tenga movimientos, usuarios o saldos asociados.";
-                }
-                else
-                {
-                    TempData["Success"] = "Bodega eliminada exitosamente";
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al eliminar bodega: {Id}", id);
-                TempData["Error"] = $"Error al eliminar la bodega: {ex.Message}";
-            }
-
-            return RedirectToAction(nameof(Index));
-        }
     }
 }
 

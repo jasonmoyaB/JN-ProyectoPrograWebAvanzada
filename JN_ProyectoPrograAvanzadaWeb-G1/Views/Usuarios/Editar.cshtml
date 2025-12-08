@@ -1,4 +1,4 @@
-@model JN_ProyectoPrograAvanzadaWeb_G1.Application.DTOs.Usuarios.EditarUsuarioDto
+@model JN_ProyectoPrograAvanzadaWeb_G1.Services.EditarUsuarioDto
 @{
     ViewData["Title"] = "Editar Usuario";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -54,7 +54,7 @@
 
                     <div class="col-md-6 mb-3">
                         <label asp-for="BodegaID" class="form-label">Bodega Asignada</label>
-                        <select asp-for="BodegaID" asp-items="ViewBag.Bodegas" class="form-select">
+                        <select asp-for="BodegaID" asp-items="ViewBag.Bodegas" name="BodegaID" class="form-select">
                             <option value="">-- Sin bodega --</option>
                         </select>
                         <span asp-validation-for="BodegaID" class="text-danger"></span>

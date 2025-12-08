@@ -1,8 +1,7 @@
-﻿using JN_ProyectoPrograAvanzadaWeb_G1.Application.DTOs.Bodegas;
-using JN_ProyectoPrograAvanzadaWeb_G1.Application.DTOs.Productos;
-using JN_ProyectoPrograAvanzadaWeb_G1.Data;
+﻿using JN_ProyectoPrograAvanzadaWeb_G1.Data;
 using JN_ProyectoPrograAvanzadaWeb_G1.Models;
 using JN_ProyectoPrograAvanzadaWeb_G1.Models.ViewModels;
+using JN_ProyectoPrograAvanzadaWeb_G1.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -13,10 +12,17 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
     public class AuditoriaController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IApiProductoService _productoService;
+        private readonly IApiBodegaService _bodegaService;
 
-        public AuditoriaController(ApplicationDbContext context)
+        public AuditoriaController(
+            ApplicationDbContext context,
+            IApiProductoService productoService,
+            IApiBodegaService bodegaService)
         {
             _context = context;
+            _productoService = productoService;
+            _bodegaService = bodegaService;
         }
 
      
@@ -29,39 +35,16 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
 
             return View(usuarios);
         }
+        
         public async Task<IActionResult> Bitacora()
         {
-            var productos = await _context.Productos
-                .OrderBy(p => p.Nombre)
-                .Select(p => new ProductoDto
-                {
-                    ProductoID = p.ProductoID,
-                    SKU = p.SKU,
-                    Nombre = p.Nombre,
-                    Descripcion = p.Descripcion,
-                    EsSerializado = p.EsSerializado,
-                    Activo = p.Activo,
-                    FechaCreacion = p.FechaCreacion
-                })
-                .ToListAsync();
-
-            var bodegas = await _context.Bodegas
-                .OrderBy(b => b.Nombre)
-                .Select(b => new BodegaDto
-                {
-                    BodegaID = b.BodegaID,
-                    Nombre = b.Nombre,
-                    Ubicacion = b.Ubicacion,
-                    Activo = b.Activo,
-                    FechaCreacion = b.FechaCreacion,
-                    
-                })
-                .ToListAsync();
+            var productos = await _productoService.GetAllAsync();
+            var bodegas = await _bodegaService.GetAllAsync();
 
             var vm = new BitacoraViewModel
             {
-                Productos = productos,
-                Bodegas = bodegas
+                Productos = productos.OrderBy(p => p.Nombre).ToList(),
+                Bodegas = bodegas.OrderBy(b => b.Nombre).ToList()
             };
 
             return View(vm);

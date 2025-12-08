@@ -1,6 +1,4 @@
-using JN_ProyectoPrograAvanzadaWeb_G1.Application.DTOs.Usuarios;
-using JN_ProyectoPrograAvanzadaWeb_G1.Application.Services;
-using JN_ProyectoPrograAvanzadaWeb_G1.Infrastructure.Repositories;
+using JN_ProyectoPrograAvanzadaWeb_G1.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -10,20 +8,20 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
     [Authorize]
     public class UsuariosController : Controller
     {
-        private readonly IUsuarioService _usuarioService;
-        private readonly IRolRepository _rolRepository;
-        private readonly IBodegaRepository _bodegaRepository;
+        private readonly IApiUsuarioService _usuarioService;
+        private readonly IApiRolService _rolService;
+        private readonly IApiBodegaService _bodegaService;
         private readonly ILogger<UsuariosController> _logger;
 
         public UsuariosController(
-            IUsuarioService usuarioService,
-            IRolRepository rolRepository,
-            IBodegaRepository bodegaRepository,
+            IApiUsuarioService usuarioService,
+            IApiRolService rolService,
+            IApiBodegaService bodegaService,
             ILogger<UsuariosController> logger)
         {
             _usuarioService = usuarioService;
-            _rolRepository = rolRepository;
-            _bodegaRepository = bodegaRepository;
+            _rolService = rolService;
+            _bodegaService = bodegaService;
             _logger = logger;
         }
 
@@ -154,35 +152,64 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
                 return RedirectToAction("Dashboard", "Tecnico");
             }
 
+
+            if (dto.BodegaID.HasValue && dto.BodegaID.Value <= 0)
+            {
+                dto.BodegaID = null;
+            }
+            
+            
+            if (Request.Form.TryGetValue("BodegaID", out var bodegaIdFormValue))
+            {
+                if (string.IsNullOrWhiteSpace(bodegaIdFormValue) || bodegaIdFormValue == "0")
+                {
+                    dto.BodegaID = null;
+                }
+            }
+
+           
+            dto.UsuarioID = id;
+
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("ModelState inválido al editar usuario {Id}. Errores: {Errors}", 
+                    id, string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
                 await CargarListasDesplegables();
                 return View(dto);
             }
 
             try
             {
+                _logger.LogInformation("Actualizando usuario {Id} con datos: Nombre={Nombre}, RolID={RolID}, BodegaID={BodegaID}, Activo={Activo}", 
+                    id, dto.Nombre, dto.RolID, dto.BodegaID, dto.Activo);
+                
                 var actualizado = await _usuarioService.UpdateAsync(id, dto);
-                if (!actualizado)
+                if (actualizado)
                 {
-                    TempData["Error"] = "Error al actualizar el usuario";
+                    _logger.LogInformation("Usuario {Id} actualizado exitosamente, redirigiendo al catálogo", id);
+                    TempData["Success"] = "Usuario actualizado exitosamente";
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    _logger.LogWarning("UpdateAsync retornó false para usuario {Id}", id);
+                    TempData["Error"] = "Error al actualizar el usuario. Verifique que el usuario exista y que los datos sean válidos.";
                     await CargarListasDesplegables();
                     return View(dto);
                 }
-
-                TempData["Success"] = "Usuario actualizado exitosamente";
-                return RedirectToAction(nameof(Index));
             }
             catch (InvalidOperationException ex)
             {
+                _logger.LogError(ex, "Error de operación al actualizar usuario {Id}: {Message}", id, ex.Message);
                 ModelState.AddModelError("", ex.Message);
+                TempData["Error"] = ex.Message;
                 await CargarListasDesplegables();
                 return View(dto);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al actualizar usuario: {Id}", id);
-                TempData["Error"] = "Error al actualizar el usuario";
+                _logger.LogError(ex, "Error inesperado al actualizar usuario {Id}: {Message}", id, ex.Message);
+                TempData["Error"] = $"Error al actualizar el usuario: {ex.Message}";
                 await CargarListasDesplegables();
                 return View(dto);
             }
@@ -222,8 +249,8 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
 
         private async Task CargarListasDesplegables()
         {
-            var roles = await _rolRepository.GetAllAsync();
-            var bodegas = await _bodegaRepository.GetAllAsync(true);
+            var roles = await _rolService.GetAllAsync();
+            var bodegas = await _bodegaService.GetAllAsync(true);
 
             ViewBag.Roles = roles.Select(r => new SelectListItem
             {

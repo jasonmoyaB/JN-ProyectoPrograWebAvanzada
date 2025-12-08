@@ -4,8 +4,8 @@
 @{
     ViewData["Title"] = "Bitácora - Productos y Bodegas";
 
-    var productos = Model?.Productos ?? new List<JN_ProyectoPrograAvanzadaWeb_G1.Application.DTOs.Productos.ProductoDto>();
-    var bodegas = Model?.Bodegas ?? new List<JN_ProyectoPrograAvanzadaWeb_G1.Application.DTOs.Bodegas.BodegaDto>();
+    var productos = Model?.Productos ?? new List<JN_ProyectoPrograAvanzadaWeb_G1.Services.ProductoDto>();
+    var bodegas = Model?.Bodegas ?? new List<JN_ProyectoPrograAvanzadaWeb_G1.Services.BodegaDto>();
 
     var totalProductos = productos.Count;
     var totalBodegas = bodegas.Count;
@@ -127,7 +127,7 @@
                                 <td>@p.Nombre</td>
                                 <td>@p.Descripcion</td>
                                 <td>@(p.Activo ? "Sí" : "No")</td>
-                                <td>@p.FechaCreacion?.ToString("yyyy-MM-dd")</td>
+                                <td>@p.FechaCreacion.ToString("yyyy-MM-dd")</td>
                             </tr>
                         }
 
@@ -139,7 +139,7 @@
                                 <td>@b.Nombre</td>
                                 <td>@b.Ubicacion</td>
                                 <td>@(b.Activo ? "Sí" : "No")</td>
-                                <td>@b.FechaCreacion?.ToString("yyyy-MM-dd")</td>
+                                <td>@b.FechaCreacion.ToString("yyyy-MM-dd")</td>
                             </tr>
                         }
                     </tbody>

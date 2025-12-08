@@ -1,7 +1,7 @@
 ﻿using JN_ProyectoPrograAvanzadaWeb_G1.Data;
-using JN_ProyectoPrograAvanzadaWeb_G1.Helpers;
 using JN_ProyectoPrograAvanzadaWeb_G1.Models;
 using JN_ProyectoPrograAvanzadaWeb_G1.Models.ViewModels;
+using JN_ProyectoPrograAvanzadaWeb_G1.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -13,10 +13,12 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
     public class UsuarioController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IApiAuthService _authService;
 
-        public UsuarioController(ApplicationDbContext context)
+        public UsuarioController(ApplicationDbContext context, IApiAuthService authService)
         {
             _context = context;
+            _authService = authService;
         }
 
         // PERFIL PERSONAL
@@ -93,7 +95,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CambiarContrasena(CambiarContrasenaViewModel model)
+        public async Task<IActionResult> CambiarContrasena(CambiarContrasenaViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
@@ -102,15 +104,16 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
             if (usuario == null)
                 return RedirectToAction("Login", "Autenticacion");
 
-            string hashActual = PasswordHelper.HashPassword(model.ContrasenaActual);
-            if (usuario.ContrasenaHash != hashActual)
+            var resultado = await _authService.CambiarContrasenaAsync(
+                model.UsuarioID, 
+                model.ContrasenaActual, 
+                model.NuevaContrasena);
+
+            if (!resultado)
             {
-                ModelState.AddModelError("", "La contraseña actual es incorrecta.");
+                ModelState.AddModelError("", "La contraseña actual es incorrecta o no se pudo cambiar la contraseña.");
                 return View(model);
             }
-
-            usuario.ContrasenaHash = PasswordHelper.HashPassword(model.NuevaContrasena);
-            _context.SaveChanges();
 
             TempData["Mensaje"] = "Contraseña actualizada correctamente.";
             return RedirectToAction("Perfil");

@@ -30,7 +30,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Models
 
         public string? Observaciones { get; set; }
 
-        // NOTA IMPORTANTE: todas deben ser nullable
+        
         public Usuario? Usuario { get; set; }
         public Producto? Producto { get; set; }
         public Bodega? Bodega { get; set; }
