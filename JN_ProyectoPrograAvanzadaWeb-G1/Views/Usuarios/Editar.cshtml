@@ -14,6 +14,23 @@
         </a>
     </div>
 
+    @* Alertas de éxito y error - se muestran cuando hay TempData *@
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <div class="card border-0 shadow-sm">
         <div class="card-body">
             <div class="mb-3">
@@ -23,7 +40,7 @@
                 </span>
             </div>
 
-            <form asp-action="Editar" method="post">
+            <form asp-action="Editar" asp-route-id="@Model.UsuarioID" method="post">
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="UsuarioID" />
 
