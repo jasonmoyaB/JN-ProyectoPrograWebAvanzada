@@ -3,44 +3,78 @@
     Layout = "~/Views/Shared/_LayoutExterno.cshtml";
 }
 
-<section class="vh-100" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
+<section class="vh-100"
+         style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
     <div class="container py-5 h-100">
         <div class="row justify-content-center align-items-center h-100">
             <div class="col-12 col-xl-10">
                 <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
                     <div class="row g-0">
-                        <!-- Imagen lateral -->
-                        <div class="col-md-6 d-none d-md-block">
-                            <div class="h-100 w-100" style="background:url('https://images.unsplash.com/photo-1601041568048-23032e53dba3?q=80&w=1600&auto=format&fit=crop') center/cover no-repeat;"></div>
-                        </div>
 
+                        <!-- Imagen lateral (Inventarios) -->
+                        <div class="col-md-6 d-none d-md-block order-md-2">
+                            <div class="h-100 w-100"
+                                 style="
+                                    background:
+                                    linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
+                                    url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1600&q=80')
+                                    center/cover no-repeat;">
+                            </div>
+                        </div> <!-- 👈 CIERRE CORRECTO -->
                         <!-- Formulario -->
                         <div class="col-md-6 d-flex align-items-center bg-white">
                             <div class="card-body p-5 w-100">
-                                <h1 class="h3 fw-bold text-primary mb-1 text-uppercase">Acceso al sistema</h1>
-                                <p class="text-muted mb-4">Gestión de bodegas y control de inventario</p>
+
+                                <h1 class="h3 fw-bold text-primary mb-1 text-uppercase">
+                                    Acceso al sistema
+                                </h1>
+                                <p class="text-muted mb-4">
+                                    Gestión de bodegas y control de inventario
+                                </p>
 
                                 @if (TempData["Mensaje"] != null)
                                 {
-                                    <div class="alert alert-success">@TempData["Mensaje"]</div>
+                                    <div class="alert alert-success">
+                                        @TempData["Mensaje"]
+                                    </div>
                                 }
 
                                 @if (ViewBag.Error != null)
                                 {
-                                    <div class="alert alert-danger">@ViewBag.Error</div>
+                                    <div class="alert alert-danger">
+                                        @ViewBag.Error
+                                    </div>
                                 }
 
                                 <form asp-action="Login" method="post">
                                     @Html.AntiForgeryToken()
-                                    <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
 
-                                    <div class="mb-3">
-                                        <label asp-for="CorreoElectronico" class="form-label fw-semibold">Correo electrónico</label>
-                                        <input asp-for="CorreoElectronico" class="form-control form-control-lg border-secondary" autofocus />
-                                        <span asp-validation-for="CorreoElectronico" class="text-danger"></span>
+                                    <div asp-validation-summary="ModelOnly"
+                                         class="text-danger mb-2">
                                     </div>
 
                                     <div class="mb-3">
+                                        <label asp-for="CorreoElectronico"
+                                               class="form-label fw-semibold">
+                                            Correo electrónico
+                                        </label>
+                                        <input asp-for="CorreoElectronico"
+                                               class="form-control form-control-lg border-secondary"
+                                               autofocus />
+                                        <span asp-validation-for="CorreoElectronico"
+                                              class="text-danger"></span>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label asp-for="Contrasena"
+                                               class="form-label fw-semibold">
+                                            Contraseña
+                                        </label>
+                                        <input asp-for="Contrasena"
+                                               type="password"
+                                               class="form-control form-control-lg border-secondary" />
+                                        <span asp-validation-for="Contrasena"
+                                              class="text-danger"></span>
                                         <label asp-for="Contrasena" class="form-label fw-semibold">Contraseña</label>
                                         <div class="position-relative">
                                             <input asp-for="Contrasena" type="password" id="passwordInput" class="form-control form-control-lg border-secondary pe-5" />
@@ -52,27 +86,36 @@
                                     </div>
 
                                     <div class="d-grid mt-4">
-                                        <button type="submit" class="btn btn-primary btn-lg shadow-sm">Ingresar</button>
+                                        <button type="submit"
+                                                class="btn btn-primary btn-lg shadow-sm">
+                                            Ingresar
+                                        </button>
                                     </div>
 
                                     <!-- Recuperar contraseña -->
                                     <div class="mt-3 text-center small">
-                                        <a asp-controller="Autenticacion" asp-action="RecuperarClave"
+                                        <a asp-controller="Autenticacion"
+                                           asp-action="RecuperarClave"
                                            class="text-decoration-none text-secondary fw-semibold">
                                             ¿Olvidaste tu contraseña?
                                         </a>
                                     </div>
 
+                                    <!-- Registro -->
                                     <div class="mt-3 text-center small">
                                         ¿No tienes cuenta?
-                                        <a asp-controller="Autenticacion" asp-action="Registro"
-                                           class="link-primary text-decoration-none fw-semibold">Regístrate</a>
+                                        <a asp-controller="Autenticacion"
+                                           asp-action="Registro"
+                                           class="link-primary text-decoration-none fw-semibold">
+                                            Regístrate
+                                        </a>
                                     </div>
                                 </form>
 
                                 <partial name="_ValidationScriptsPartial" />
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
