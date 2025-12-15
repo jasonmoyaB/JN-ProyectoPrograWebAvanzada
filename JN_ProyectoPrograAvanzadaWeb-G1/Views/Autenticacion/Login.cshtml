@@ -3,17 +3,15 @@
     Layout = "~/Views/Shared/_LayoutExterno.cshtml";
 }
 
-<section class="vh-100 d-flex align-items-center"
+<section class="vh-100"
          style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
-
-    <div class="container">
-        <div class="row justify-content-center">
+    <div class="container py-5 h-100">
+        <div class="row justify-content-center align-items-center h-100">
             <div class="col-12 col-xl-10">
-
                 <div class="card border-0 shadow-lg rounded-4 overflow-hidden h-100">
                     <div class="row g-0 h-100">
 
-                        <!-- IMAGEN -->
+                        <!-- Imagen lateral -->
                         <div class="col-md-6 order-md-2">
                             <div class="h-100 w-100"
                                  style="
@@ -24,7 +22,7 @@
                             </div>
                         </div>
 
-                        <!-- FORMULARIO -->
+                        <!-- Formulario -->
                         <div class="col-md-6 d-flex align-items-center bg-white">
                             <div class="card-body p-5 w-100">
 
@@ -37,19 +35,24 @@
 
                                 @if (TempData["Mensaje"] != null)
                                 {
-                                    <div class="alert alert-success">@TempData["Mensaje"]</div>
+                                    <div class="alert alert-success">
+                                        @TempData["Mensaje"]
+                                    </div>
                                 }
 
                                 @if (ViewBag.Error != null)
                                 {
-                                    <div class="alert alert-danger">@ViewBag.Error</div>
+                                    <div class="alert alert-danger">
+                                        @ViewBag.Error
+                                    </div>
                                 }
 
                                 <form asp-action="Login" method="post">
                                     @Html.AntiForgeryToken()
 
                                     <div asp-validation-summary="ModelOnly"
-                                         class="text-danger mb-2"></div>
+                                         class="text-danger mb-2">
+                                    </div>
 
                                     <div class="mb-3">
                                         <label asp-for="CorreoElectronico"
@@ -74,7 +77,9 @@
                                                    id="passwordInput"
                                                    class="form-control form-control-lg border-secondary pe-5" />
                                             <button type="button"
-                                                    class="btn btn-link position-absolute end-0 top-50 translate-middle-y pe-3">
+                                                    class="btn btn-link position-absolute end-0 top-50 translate-middle-y pe-3"
+                                                    id="togglePassword"
+                                                    style="border:none;background:transparent;color:#6c757d;">
                                                 <i class="bi bi-eye fs-5" id="eyeIcon"></i>
                                             </button>
                                         </div>
@@ -101,7 +106,7 @@
                                         ¿No tienes cuenta?
                                         <a asp-controller="Autenticacion"
                                            asp-action="Registro"
-                                           class="link-primary fw-semibold text-decoration-none">
+                                           class="link-primary text-decoration-none fw-semibold">
                                             Regístrate
                                         </a>
                                     </div>
@@ -113,8 +118,23 @@
 
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('passwordInput');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        togglePassword.addEventListener('click', function () {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+
+            eyeIcon.classList.toggle('bi-eye');
+            eyeIcon.classList.toggle('bi-eye-slash');
+        });
+    });
+</script>
