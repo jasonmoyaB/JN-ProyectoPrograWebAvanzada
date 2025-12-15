@@ -1,5 +1,7 @@
 namespace JN_ProyectoPrograAvanzadaApi_G1.Domain.Entities
 {
+
+    //bitacora       
     public class BitacoraErrores
     {
         public int BitacoraErrorID { get; set; }

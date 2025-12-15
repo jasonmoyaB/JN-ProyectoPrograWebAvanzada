@@ -1,5 +1,7 @@
 namespace JN_ProyectoPrograAvanzadaApi_G1.Domain.Entities
 {
+
+    //auditoria  
     public class Auditoria
     {
         public int AuditoriaID { get; set; }

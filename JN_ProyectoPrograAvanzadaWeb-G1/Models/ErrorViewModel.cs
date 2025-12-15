@@ -1,3 +1,6 @@
+
+
+
 namespace JN_ProyectoPrograAvanzadaWeb_G1.Models
 {
     public class ErrorViewModel

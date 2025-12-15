@@ -109,17 +109,16 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Application.Services
             
             _logger.LogInformation("UsuarioService: UpdateAsync retornó {Resultado} para usuario {UsuarioId}", resultado, usuarioId);
             
-            // Si el repositorio retorna false pero el usuario existe, verificar si realmente se actualizó
-            // Esto puede ocurrir si el stored procedure actualiza pero no retorna rowsAffected correctamente
+           
             if (!resultado)
             {
                 _logger.LogWarning("UsuarioService: UpdateAsync retornó false, verificando si los datos se actualizaron realmente para usuario {UsuarioId}", usuarioId);
                 
-                // Verificar si los datos realmente cambiaron consultando nuevamente
+               
                 var usuarioActualizado = await _usuarioRepository.GetByIdAsync(usuarioId);
                 if (usuarioActualizado != null)
                 {
-                    // Si los datos coinciden con lo que intentamos actualizar, considerar éxito
+                    
                     if (usuarioActualizado.Nombre == dto.Nombre &&
                         usuarioActualizado.CorreoElectronico == dto.CorreoElectronico &&
                         usuarioActualizado.RolID == dto.RolID &&
@@ -147,28 +146,25 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Application.Services
 
         public async Task<bool> ToggleActivoAsync(int usuarioId)
         {
-            // Obtener el estado actual antes de cambiar
             var usuario = await _usuarioRepository.GetByIdAsync(usuarioId);
             if (usuario == null) return false;
             
             var estadoAnterior = usuario.Activo;
             
-            // Intentar cambiar el estado
+           
             var resultado = await _usuarioRepository.ToggleActivoAsync(usuarioId);
             
             _logger.LogInformation("UsuarioService: ToggleActivoAsync retornó {Resultado} para usuario {UsuarioId}", resultado, usuarioId);
             
-            // Si el repositorio retorna false pero el usuario existe, verificar si realmente se cambió
-            // Esto puede ocurrir si el stored procedure cambia el estado pero no retorna rowsAffected correctamente
+           
             if (!resultado)
             {
                 _logger.LogWarning("UsuarioService: ToggleActivoAsync retornó false, verificando si el estado se cambió realmente para usuario {UsuarioId}", usuarioId);
                 
-                // Verificar si el estado realmente cambió consultando nuevamente
                 var usuarioActualizado = await _usuarioRepository.GetByIdAsync(usuarioId);
                 if (usuarioActualizado != null)
                 {
-                    // Si el estado cambió (de activo a inactivo o viceversa), considerar éxito
+                    
                     if (usuarioActualizado.Activo != estadoAnterior)
                     {
                         _logger.LogInformation("UsuarioService: El estado se cambió correctamente aunque ToggleActivoAsync retornó false. Estado anterior: {EstadoAnterior}, Estado actual: {EstadoActual}. Retornando true para usuario {UsuarioId}", 

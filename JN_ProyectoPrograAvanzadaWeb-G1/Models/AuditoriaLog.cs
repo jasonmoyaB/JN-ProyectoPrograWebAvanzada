@@ -1,4 +1,7 @@
-﻿namespace JN_ProyectoPrograAvanzadaWeb_G1.Models
+﻿
+
+
+namespace JN_ProyectoPrograAvanzadaWeb_G1.Models
 {
     public class AuditoriaLog
     {

@@ -57,33 +57,78 @@
 
     <div class="card border-0 shadow-sm">
         <div class="card-body">
-            <table id="tablaMovimientos" class="table table-sm table-hover align-middle">
-                <thead class="table-light">
-                    <tr class="text-muted">
-                        <th>ID</th>
-                        <th>Fecha</th>
-                        <th>Tipo</th>
-                        <th>Referencia</th>
-                        <th>Observaciones</th>
-                        <th>Usuario</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var movimiento in Model)
-                    {
-                        <tr>
-                            <td>@movimiento.MovimientoID</td>
-                            <td>@movimiento.FechaMovimientoUTC.ToString("dd/MM/yyyy HH:mm")</td>
-                            <td>
-                                <span class="badge bg-info">@movimiento.TipoMovimientoCodigo</span>
-                            </td>
-                            <td>@(movimiento.Referencia ?? "-")</td>
-                            <td>@(movimiento.Observaciones ?? "-")</td>
-                            <td>@movimiento.UsuarioNombre</td>
+            @if (Model == null || !Model.Any())
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>No se encontraron movimientos para tu bodega.
+                </div>
+            }
+            else
+            {
+                <table id="tablaMovimientos" class="table table-sm table-hover align-middle">
+                    <thead class="table-light">
+                        <tr class="text-muted">
+                            <th>ID</th>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Referencia</th>
+                            <th>Productos</th>
+                            <th>Observaciones</th>
+                            <th>Usuario</th>
+                            <th>Acciones</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var movimiento in Model)
+                        {
+                            <tr>
+                                <td>@movimiento.MovimientoID</td>
+                                <td>@movimiento.FechaMovimientoUTC.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    @{
+                                        var badgeClass = movimiento.TipoMovimientoNaturaleza > 0 ? "bg-success" : "bg-danger";
+                                        var tipoNombre = !string.IsNullOrEmpty(movimiento.TipoMovimientoNombre) ? movimiento.TipoMovimientoNombre : movimiento.TipoMovimientoCodigo;
+                                    }
+                                    <span class="badge @badgeClass" title="@tipoNombre">@movimiento.TipoMovimientoCodigo</span>
+                                </td>
+                                <td>@(movimiento.Referencia ?? "-")</td>
+                                <td>
+                                    @if (movimiento.Detalles != null && movimiento.Detalles.Any())
+                                    {
+                                        <span class="badge bg-secondary" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                              title="@string.Join(", ", movimiento.Detalles.Select(d => $"{d.ProductoNombre} ({d.Cantidad})"))">
+                                            @movimiento.Detalles.Count producto(s)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(movimiento.Observaciones))
+                                    {
+                                        <span data-bs-toggle="tooltip" data-bs-placement="top" title="@movimiento.Observaciones">
+                                            @(movimiento.Observaciones.Length > 30 ? movimiento.Observaciones.Substring(0, 30) + "..." : movimiento.Observaciones)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>@movimiento.UsuarioNombre</td>
+                                <td>
+                                    <a asp-action="DetalleMovimiento" asp-route-id="@movimiento.MovimientoID" 
+                                       class="btn btn-sm btn-outline-primary" title="Ver detalles">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
         </div>
     </div>
 </div>
@@ -94,16 +139,32 @@
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script>
         $(document).ready(function () {
-            $('#tablaMovimientos').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
-                },
-                pageLength: 15,
-                lengthChange: true,
-                ordering: true,
-                responsive: true,
-                order: [[1, 'desc']]
+           
+
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
             });
+
+            
+
+            @if (Model != null && Model.Any())
+            {
+                <text>
+                if ($('#tablaMovimientos').length) {
+                    $('#tablaMovimientos').DataTable({
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                        },
+                        pageLength: 15,
+                        lengthChange: true,
+                        ordering: true,
+                        responsive: true,
+                        order: [[1, 'desc']]
+                    });
+                }
+                </text>
+            }
         });
     </script>
 }

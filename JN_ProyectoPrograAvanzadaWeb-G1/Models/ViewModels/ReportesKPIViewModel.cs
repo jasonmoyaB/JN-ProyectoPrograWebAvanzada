@@ -1,4 +1,6 @@
-﻿using System;
+﻿
+
+using System;
 using System.Collections.Generic;
 
 namespace JN_ProyectoPrograAvanzadaWeb_G1.Models.ViewModels

@@ -1,3 +1,5 @@
+
+
 namespace JN_ProyectoPrograAvanzadaApi_G1.Application.DTOs.Movimientos
 {
     public class MovimientoDto
@@ -7,6 +9,8 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Application.DTOs.Movimientos
         public string BodegaNombre { get; set; } = string.Empty;
         public int TipoMovimientoID { get; set; }
         public string TipoMovimientoCodigo { get; set; } = string.Empty;
+        public string TipoMovimientoNombre { get; set; } = string.Empty;
+        public short TipoMovimientoNaturaleza { get; set; }
         public int UsuarioID { get; set; }
         public string UsuarioNombre { get; set; } = string.Empty;
         public DateTime FechaMovimientoUTC { get; set; }
@@ -16,6 +20,7 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Application.DTOs.Movimientos
         public string? BodegaRelacionadaNombre { get; set; }
         public int? ProveedorID { get; set; }
         public string? ProveedorNombre { get; set; }
+        public List<MovimientoDetalleDto>? Detalles { get; set; }
     }
 }
 

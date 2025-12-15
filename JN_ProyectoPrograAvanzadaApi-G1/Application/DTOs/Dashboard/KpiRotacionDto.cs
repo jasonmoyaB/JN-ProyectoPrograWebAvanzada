@@ -1,3 +1,6 @@
+
+
+
 namespace JN_ProyectoPrograAvanzadaApi_G1.Application.DTOs.Dashboard
 {
     public class KpiRotacionDto

@@ -1,5 +1,5 @@
 using JN_ProyectoPrograAvanzadaApi_G1.Application.DTOs.Usuarios;
-
+//Usuario
 namespace JN_ProyectoPrograAvanzadaApi_G1.Application.Services
 {
     public interface IUsuarioService

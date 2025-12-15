@@ -1,3 +1,5 @@
+
+
 namespace JN_ProyectoPrograAvanzadaApi_G1.Domain.Entities
 {
     public class StockMinimo

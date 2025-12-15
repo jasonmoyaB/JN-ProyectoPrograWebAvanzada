@@ -1,4 +1,6 @@
-﻿using System;
+﻿
+
+using System;
 
 namespace JN_ProyectoPrograAvanzadaWeb_G1.Models
 {

@@ -147,7 +147,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
                     return View("Registro", model);
                 }
 
-                // Obtener rol Técnico
+                // Obtener rol Tcnico
                 var roles = await _rolService.GetAllAsync();
                 var tecnico = roles.FirstOrDefault(r => r.NombreRol == "Técnico" || r.NombreRol == "Tecnico");
                 if (tecnico == null)

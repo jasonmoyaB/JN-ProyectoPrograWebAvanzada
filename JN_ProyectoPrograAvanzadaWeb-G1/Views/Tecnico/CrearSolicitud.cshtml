@@ -24,6 +24,14 @@
         </div>
     }
 
+    @if (TempData["Warning"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Warning"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
     <div class="card border-0 shadow-sm">
         <div class="card-body">
             <form asp-action="CrearSolicitud" method="post" id="formSolicitud">
@@ -50,7 +58,7 @@
                     </div>
 
                     <div id="productosContainer">
-                        <!-- Los productos se agregarán dinámicamente aquí -->
+                        
                     </div>
                     <span asp-validation-for="Detalles" class="text-danger"></span>
                 </div>
@@ -73,11 +81,19 @@
         var productoIndex = 0;
 
         $(document).ready(function () {
+            
+            console.log('Productos cargados:', productos);
+            console.log('Cantidad de productos:', productos ? productos.length : 0);
+
+            if (!productos || productos.length === 0) {
+                console.error('No se cargaron productos. Verificar que el servicio esté funcionando correctamente.');
+            }
+
             $('#btnAgregarProducto').click(function () {
                 agregarFilaProducto();
             });
 
-            // Agregar primera fila
+           
             agregarFilaProducto();
         });
 
@@ -87,16 +103,22 @@
                     <div class="col-md-5">
                         <select name="Detalles[${productoIndex}].ProductoID" class="form-select producto-select" required>
                             <option value="">-- Seleccione un producto --</option>
-                            ${productos.map(p => `<option value="${p.productoID}">${p.sku} - ${p.nombre}</option>`).join('')}
+                            ${productos.map(p => {
+                                var cantidad = p.CantidadDisponible || 0;
+                                var cantidadTexto = cantidad > 0 ? ` (Disponible: ${cantidad})` : ' (Sin stock)';
+                                return `<option value="${p.ProductoID}" data-cantidad="${cantidad}">${p.SKU} - ${p.Nombre}${cantidadTexto}</option>`;
+                            }).join('')}
                         </select>
                     </div>
                     <div class="col-md-4">
                         <input type="number" name="Detalles[${productoIndex}].CantidadSolicitada" 
                                class="form-control cantidad-input" 
                                placeholder="Cantidad" 
-                               step="0.01" 
-                               min="0.0001" 
+                               step="1" 
+                               min="1" 
+                               max=""
                                required />
+                        <small class="text-muted stock-disponible-text"></small>
                     </div>
                     <div class="col-md-3">
                         <button type="button" class="btn btn-sm btn-danger btnEliminarFila">
@@ -106,6 +128,23 @@
                 </div>
             `;
             $('#productosContainer').append(html);
+            
+            
+            var $select = $('#productosContainer').find('.producto-select').last();
+            var $input = $select.closest('.producto-fila').find('.cantidad-input');
+            var $stockText = $select.closest('.producto-fila').find('.stock-disponible-text');
+            
+            $select.on('change', function() {
+                var selectedOption = $(this).find('option:selected');
+                var cantidadDisponible = parseFloat(selectedOption.data('cantidad')) || 0;
+                $input.attr('max', cantidadDisponible);
+                if (cantidadDisponible > 0) {
+                    $stockText.text(`Stock disponible: ${cantidadDisponible}`).removeClass('text-danger').addClass('text-success');
+                } else {
+                    $stockText.text('Sin stock disponible').removeClass('text-success').addClass('text-danger');
+                }
+            });
+            
             productoIndex++;
         }
 

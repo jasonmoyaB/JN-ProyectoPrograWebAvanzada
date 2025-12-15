@@ -55,7 +55,7 @@
                     {
                         <tr>
                             <td>@solicitud.SolicitudID</td>
-                            <td>@solicitud.FechaCreacionUTC.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@solicitud.FechaCreacionUTC.ToCostaRicaTime().ToString("dd/MM/yyyy HH:mm")</td>
                             <td>
                                 @{
                                     var estadoClass = solicitud.EstadoCodigo switch

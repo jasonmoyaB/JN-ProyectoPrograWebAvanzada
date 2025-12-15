@@ -9,6 +9,7 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Application.Services
         Task<MovimientoDto?> GetByIdAsync(int movimientoId);
         Task<int> GetCountMovimientosHoyByBodegaAsync(int bodegaId);
         Task<int> GetCountMovimientosHoyByUsuarioAsync(int usuarioId);
+        Task<int> CreateTrasladoAsync(MovimientoTrasladoDto dto, int usuarioId);
     }
 }
 

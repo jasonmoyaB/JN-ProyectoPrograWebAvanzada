@@ -1,3 +1,4 @@
+
 using System.ComponentModel.DataAnnotations;
 
 namespace JN_ProyectoPrograAvanzadaApi_G1.Application.DTOs.Usuarios

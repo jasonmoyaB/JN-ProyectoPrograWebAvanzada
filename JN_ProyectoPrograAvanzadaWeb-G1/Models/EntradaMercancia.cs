@@ -1,4 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿
+
+
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JN_ProyectoPrograAvanzadaWeb_G1.Models
@@ -14,16 +17,21 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Models
         [Required]
         public int UsuarioID { get; set; }
 
-        [Required]
         [StringLength(20)]
-        public string TipoMovimiento { get; set; }
+        public string TipoMovimiento { get; set; } = string.Empty;
+
+        [Required]
+        public int TipoMovimientoID { get; set; }
+        
+     
+        public TipoMovimiento? TipoMovimientoNav { get; set; }
 
         [Required]
         public int ProductoID { get; set; }
 
         [Required]
-        [Range(0.01, double.MaxValue)]
-        public decimal Cantidad { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "La cantidad debe ser mayor a 0")]
+        public int Cantidad { get; set; }
 
         [Required]
         public int BodegaID { get; set; }

@@ -121,13 +121,16 @@
                             </a>
                             <div class="collapse" id="collapseGestion" data-bs-parent="#sidenavAccordion">
                                 <nav class="sb-sidenav-menu-nested nav">
-                                    <a class="nav-link" href="/Solicitudes">
-                                        <i class="bi bi-clipboard-check me-2"></i>Solicitudes
+                                    <a class="nav-link" asp-controller="GestionSolicitudes" asp-action="Index">
+                                        <i class="bi bi-clipboard-check me-2"></i>Gestionar Solicitudes
                                     </a>
-                                    <a class="nav-link" href="/Movimientos">
+                                    <a class="nav-link" asp-controller="Traslados" asp-action="Create">
+                                        <i class="bi bi-arrow-left-right me-2"></i>Traslados
+                                    </a>
+                                    <a class="nav-link" asp-controller="Movimientos" asp-action="Index">
                                         <i class="bi bi-arrow-left-right me-2"></i>Movimientos
                                     </a>
-                                    <a class="nav-link" href="/Inventario">
+                                    <a class="nav-link" asp-controller="Movimientos" asp-action="Index">
                                         <i class="bi bi-clipboard-data me-2"></i>Inventario Global
                                     </a>
                                 </nav>

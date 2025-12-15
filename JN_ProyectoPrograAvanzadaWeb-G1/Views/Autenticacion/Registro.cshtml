@@ -38,7 +38,12 @@
 
                                     <div class="mb-4">
                                         <label asp-for="Contrasena" class="form-label fw-semibold">Contraseña</label>
-                                        <input asp-for="Contrasena" type="password" class="form-control form-control-lg border-secondary" />
+                                        <div class="position-relative">
+                                            <input asp-for="Contrasena" type="password" id="passwordInput" class="form-control form-control-lg border-secondary pe-5" />
+                                            <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y pe-3" id="togglePassword" style="border: none; background: transparent; color: #6c757d; z-index: 10; cursor: pointer; padding: 0.5rem;">
+                                                <i class="bi bi-eye fs-5" id="eyeIcon"></i>
+                                            </button>
+                                        </div>
                                         <span asp-validation-for="Contrasena" class="text-danger"></span>
                                     </div>
 
@@ -61,3 +66,27 @@
         </div>
     </div>
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('passwordInput');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        if (togglePassword && passwordInput && eyeIcon) {
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+
+                // Cambiar el ícono
+                if (type === 'text') {
+                    eyeIcon.classList.remove('bi-eye');
+                    eyeIcon.classList.add('bi-eye-slash');
+                } else {
+                    eyeIcon.classList.remove('bi-eye-slash');
+                    eyeIcon.classList.add('bi-eye');
+                }
+            });
+        }
+    });
+</script>

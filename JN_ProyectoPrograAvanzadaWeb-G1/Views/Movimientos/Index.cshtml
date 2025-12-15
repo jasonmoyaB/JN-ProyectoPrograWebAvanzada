@@ -1,0 +1,156 @@
+@model List<JN_ProyectoPrograAvanzadaWeb_G1.Services.MovimientoDto>
+@{
+    ViewData["Title"] = "Movimientos de Inventario";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    
+    var bodegas = ViewBag.Bodegas as List<JN_ProyectoPrograAvanzadaWeb_G1.Services.BodegaDto> ?? new List<JN_ProyectoPrograAvanzadaWeb_G1.Services.BodegaDto>();
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h2 class="mb-0 text-secondary">
+            <i class="bi bi-arrow-left-right me-2"></i>Movimientos de Inventario
+        </h2>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Filtros -->
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Bodega:</label>
+                    <select name="bodegaId" class="form-select">
+                        <option value="">Todas las bodegas</option>
+                        @foreach (var bodega in bodegas)
+                        {
+                            <option value="@bodega.BodegaID" selected="@(ViewBag.BodegaId == bodega.BodegaID)">@bodega.Nombre</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Fecha Desde:</label>
+                    <input type="date" name="fechaDesde" class="form-control" value="@ViewBag.FechaDesde" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Fecha Hasta:</label>
+                    <input type="date" name="fechaHasta" class="form-control" value="@ViewBag.FechaHasta" />
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-outline-secondary me-2">
+                        <i class="bi bi-filter me-1"></i>Filtrar
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Limpiar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla de Movimientos -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            @if (Model == null || !Model.Any())
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>No se encontraron movimientos con los filtros seleccionados.
+                </div>
+            }
+            else
+            {
+                <table id="tablaMovimientos" class="table table-sm table-hover align-middle">
+                    <thead class="table-light">
+                        <tr class="text-muted">
+                            <th>ID</th>
+                            <th>Fecha</th>
+                            <th>Bodega</th>
+                            <th>Tipo</th>
+                            <th>Usuario</th>
+                            <th>Productos</th>
+                            <th>Referencia</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var movimiento in Model)
+                        {
+                            var esEntrada = movimiento.TipoMovimientoNaturaleza == 1;
+                            var tipoClass = esEntrada ? "text-success" : "text-danger";
+                            var tipoIcon = esEntrada ? "bi-arrow-down" : "bi-arrow-up";
+                            
+                            <tr>
+                                <td><strong>#@movimiento.MovimientoID</strong></td>
+                                <td>
+                                    <span class="badge bg-light text-dark">
+                                        @movimiento.FechaMovimientoUTC.ToString("dd/MM/yyyy HH:mm")
+                                    </span>
+                                </td>
+                                <td>@movimiento.BodegaNombre</td>
+                                <td>
+                                    <i class="bi @tipoIcon @tipoClass me-1"></i>
+                                    <span>@movimiento.TipoMovimientoNombre</span>
+                                </td>
+                                <td>@movimiento.UsuarioNombre</td>
+                                <td>
+                                    <span class="badge bg-primary">@(movimiento.Detalles?.Count ?? 0) producto(s)</span>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(movimiento.Referencia))
+                                    {
+                                        <span class="badge bg-info">@movimiento.Referencia</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <a asp-controller="Movimientos" asp-action="Detalles" asp-route-id="@movimiento.MovimientoID" 
+                                       class="btn btn-sm btn-outline-primary" title="Ver detalles">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            @if (Model != null && Model.Any())
+            {
+                <text>
+                $('#tablaMovimientos').DataTable({
+                    language: {
+                        url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                    },
+                    pageLength: 10,
+                    responsive: true,
+                    ordering: true,
+                    order: [[0, 'desc']] 
+                });
+                </text>
+            }
+        });
+    </script>
+}
+
+
+
+

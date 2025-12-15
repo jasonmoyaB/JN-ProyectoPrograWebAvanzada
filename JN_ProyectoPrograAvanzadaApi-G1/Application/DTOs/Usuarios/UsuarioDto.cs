@@ -1,3 +1,4 @@
+
 namespace JN_ProyectoPrograAvanzadaApi_G1.Application.DTOs.Usuarios
 {
     public class UsuarioDto

@@ -1,5 +1,7 @@
 namespace JN_ProyectoPrograAvanzadaApi_G1.Domain.Entities
 {
+
+    // Representa un despacho de productos entre bodegas.
     public class Despacho
     {
         public int DespachoID { get; set; }

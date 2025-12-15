@@ -2,11 +2,18 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Services
 {
     public interface IApiSolicitudService
     {
+        Task<List<SolicitudDto>> GetAllAsync();
         Task<List<SolicitudDto>> GetByUsuarioAsync(int usuarioId);
         Task<List<SolicitudDto>> GetByBodegaAsync(int bodegaId);
         Task<SolicitudDto?> GetByIdAsync(int id);
         Task<int> CreateAsync(CrearSolicitudDto dto, int usuarioId);
         Task<int> GetCountPendientesByUsuarioAsync(int usuarioId);
+        Task AprobarAsync(int id, int usuarioId, string? comentarios = null);
+        Task RechazarAsync(int id, int usuarioId, string? comentarios = null);
+        Task EnviarAsync(int id, string? comentarios = null);
+        Task EntregarAsync(int id, int bodegaOrigenId, int bodegaDestinoId, int usuarioId, string? comentarios = null);
+        Task EstablecerCantidadesEnviadasAsync(int id, EstablecerCantidadesEnviadasDto dto);
+        Task<bool> TieneCantidadesEnviadasAsync(int id);
     }
 
     public class SolicitudDto
@@ -50,6 +57,17 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Services
     {
         public int ProductoID { get; set; }
         public decimal CantidadSolicitada { get; set; }
+    }
+
+    public class EstablecerCantidadesEnviadasDto
+    {
+        public List<CantidadEnviadaDetalleDto> Detalles { get; set; } = new List<CantidadEnviadaDetalleDto>();
+    }
+
+    public class CantidadEnviadaDetalleDto
+    {
+        public int ProductoID { get; set; }
+        public decimal CantidadEnviada { get; set; }
     }
 }
 

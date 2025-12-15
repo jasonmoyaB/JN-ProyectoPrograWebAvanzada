@@ -116,6 +116,54 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Services
                 return 0;
             }
         }
+
+        public async Task<int> CreateTrasladoAsync(MovimientoTrasladoDto dto, int usuarioId)
+        {
+            try
+            {
+                var request = new { Dto = dto, UsuarioID = usuarioId };
+                var response = await _httpClient.PostAsJsonAsync("api/movimientos/traslado", request);
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Error al crear traslado. Status: {StatusCode}, Response: {ErrorContent}", 
+                        response.StatusCode, errorContent);
+                    
+                   
+                    try
+                    {
+                        var errorJson = await response.Content.ReadFromJsonAsync<JsonElement>();
+                        if (errorJson.TryGetProperty("message", out var message))
+                        {
+                            throw new InvalidOperationException(message.GetString() ?? "Error al crear el traslado");
+                        }
+                    }
+                    catch
+                    {
+                      
+                        throw new InvalidOperationException($"Error al crear el traslado: {errorContent}");
+                    }
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<JsonElement>();
+                if (result.TryGetProperty("movimientoId", out var movimientoId))
+                {
+                    return movimientoId.GetInt32();
+                }
+                return 0;
+            }
+            catch (InvalidOperationException)
+            {
+                // (errores del API)
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al crear traslado: {Message}", ex.Message);
+                throw new InvalidOperationException($"Error al comunicarse con el API: {ex.Message}", ex);
+            }
+        }
     }
 }
 
