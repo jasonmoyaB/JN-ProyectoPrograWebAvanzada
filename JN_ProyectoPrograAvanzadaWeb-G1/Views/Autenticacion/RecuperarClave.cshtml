@@ -1,5 +1,4 @@
-﻿
-@model JN_ProyectoPrograAvanzadaWeb_G1.Models.ViewModels.RecuperarClaveViewModel
+﻿@model JN_ProyectoPrograAvanzadaWeb_G1.Models.ViewModels.RecuperarClaveViewModel
 @{
     Layout = "~/Views/Shared/_LayoutExterno.cshtml";
 }
@@ -8,22 +7,23 @@
     <div class="container py-5 h-100">
         <div class="row justify-content-center align-items-center h-100">
             <div class="col-12 col-xl-10">
-                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-                    <div class="row g-0">
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden h-100">
+
+                    <div class="row g-0 h-100">
                         <!-- Imagen lateral -->
-                        <div class="col-md-6 d-none d-md-block position-relative">
-                            <div class="h-100 w-100" style="
-                                background:url('https://images.unsplash.com/photo-1592432901544-3c8bff0d0475?q=80&w=1600&auto=format&fit=crop')
-                                center/cover no-repeat;
-                                filter: brightness(0.8);">
+                        <div class="col-md-6 d-none d-md-block order-md-2">
+                            <div class="h-100 w-100"
+                                 style="
+                                    background:
+                                    linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
+                                    url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1600&q=80')
+                                    center/cover no-repeat;">
                             </div>
-                            <div class="position-absolute top-0 start-0 w-100 h-100" style="background:rgba(0,0,0,0.25);"></div>
                         </div>
 
                         <!-- Formulario -->
                         <div class="col-md-6 d-flex align-items-center bg-white">
                             <div class="card-body p-5 text-center w-100">
-
                                 <img src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png"
                                      alt="Recuperar contraseña" width="80" class="mb-3" />
 
@@ -64,6 +64,7 @@
                                 <partial name="_ValidationScriptsPartial" />
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
