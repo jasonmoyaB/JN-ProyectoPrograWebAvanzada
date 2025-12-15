@@ -5,9 +5,13 @@ using JN_ProyectoPrograAvanzadaWeb_G1.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = null; 
+    });
 
-// HTTP Client para consumir el API
+// consumir el API
 builder.Services.AddHttpClient("ApiClient", client =>
 {
     var apiUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7001";
@@ -15,8 +19,7 @@ builder.Services.AddHttpClient("ApiClient", client =>
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 
-// ApplicationDbContext se mantiene solo si es necesario para migraciones o operaciones específicas
-// La lógica de negocio debe consumirse desde el API
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 

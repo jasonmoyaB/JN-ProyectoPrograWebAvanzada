@@ -37,7 +37,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
         [HttpGet]
         public IActionResult Main()
         {
-            // Redirigir según el rol del usuario
+            // Redirigir  el rol del usuario
             var rolId = HttpContext.Session.GetInt32("RolID");
             if (rolId == 1) // Administrador
                 return RedirectToAction("Dashboard", "Admin");

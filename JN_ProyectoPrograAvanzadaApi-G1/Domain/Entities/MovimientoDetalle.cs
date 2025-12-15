@@ -1,5 +1,7 @@
 namespace JN_ProyectoPrograAvanzadaApi_G1.Domain.Entities
 {
+
+    //Movim,ientos Detalle
     public class MovimientoDetalle
     {
         public int MovimientoDetalleID { get; set; }

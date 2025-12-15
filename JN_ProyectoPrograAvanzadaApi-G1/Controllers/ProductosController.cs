@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using JN_ProyectoPrograAvanzadaApi_G1.Application.DTOs.Productos;
 using JN_ProyectoPrograAvanzadaApi_G1.Application.Services;
-
+//ProductosController.cs
 namespace JN_ProyectoPrograAvanzadaApi_G1.Controllers
 {
     [ApiController]

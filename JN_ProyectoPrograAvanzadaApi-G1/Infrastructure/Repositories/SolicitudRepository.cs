@@ -14,6 +14,109 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
             _connectionFactory = connectionFactory;
         }
 
+        public async Task<List<Solicitud>> GetAllAsync()
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                var sql = @"
+                    SELECT 
+                        s.SolicitudID,
+                        s.EstadoSolicitudID,
+                        s.BodegaID,
+                        s.UsuarioID,
+                        s.FechaCreacionUTC,
+                        s.FechaAprobacionUTC,
+                        s.FechaEnvioUTC,
+                        s.FechaEntregaUTC,
+                        s.Comentarios,
+                        s.UsuarioAprobadorID,
+                        s.DespachoID,
+                        es.EstadoSolicitudID,
+                        es.Codigo
+                    FROM inv.Solicitudes s
+                    LEFT JOIN inv.EstadosSolicitud es ON s.EstadoSolicitudID = es.EstadoSolicitudID
+                    ORDER BY s.FechaCreacionUTC DESC";
+
+                var solicitudes = await connection.QueryAsync<Solicitud, EstadoSolicitud, Solicitud>(
+                    sql,
+                    (s, es) => 
+                    { 
+                        s.EstadoSolicitud = es ?? new EstadoSolicitud { Codigo = "N/A" }; 
+                        return s; 
+                    },
+                    splitOn: "EstadoSolicitudID");
+
+                var result = solicitudes?.ToList() ?? new List<Solicitud>();
+
+                
+                foreach (var solicitud in result)
+                {
+                    try
+                    {
+                       
+                        if (solicitud.BodegaID > 0)
+                        {
+                            solicitud.Bodega = await connection.QueryFirstOrDefaultAsync<Bodega>(
+                                "SELECT BodegaID, Nombre, Activo FROM inv.Bodegas WHERE BodegaID = @BodegaID",
+                                new { BodegaID = solicitud.BodegaID });
+                        }
+
+                        
+                        if (solicitud.UsuarioID > 0)
+                        {
+                            solicitud.Usuario = await connection.QueryFirstOrDefaultAsync<Usuario>(
+                                "SELECT UsuarioID, Nombre FROM inv.Usuarios WHERE UsuarioID = @UsuarioID",
+                                new { UsuarioID = solicitud.UsuarioID });
+                        }
+
+                        
+                        if (solicitud.UsuarioAprobadorID.HasValue && solicitud.UsuarioAprobadorID.Value > 0)
+                        {
+                            solicitud.UsuarioAprobador = await connection.QueryFirstOrDefaultAsync<Usuario>(
+                                "SELECT UsuarioID, Nombre FROM inv.Usuarios WHERE UsuarioID = @UsuarioID",
+                                new { UsuarioID = solicitud.UsuarioAprobadorID.Value });
+                        }
+
+                        
+                        var detallesSql = @"
+                            SELECT 
+                                sd.SolicitudDetalleID,
+                                sd.SolicitudID,
+                                sd.ProductoID,
+                                sd.CantidadSolicitada,
+                                sd.CantidadEnviada,
+                                p.ProductoID,
+                                p.SKU,
+                                p.Nombre
+                            FROM inv.SolicitudDetalle sd
+                            LEFT JOIN inv.Productos p ON sd.ProductoID = p.ProductoID
+                            WHERE sd.SolicitudID = @SolicitudID";
+
+                        var detalles = await connection.QueryAsync<SolicitudDetalle, Producto, SolicitudDetalle>(
+                            detallesSql,
+                            (sd, p) => { sd.Producto = p; return sd; },
+                            new { SolicitudID = solicitud.SolicitudID },
+                            splitOn: "ProductoID");
+
+                        solicitud.Detalles = detalles?.ToList() ?? new List<SolicitudDetalle>();
+                    }
+                    catch
+                    {
+                       
+                        solicitud.Detalles = new List<SolicitudDetalle>();
+                    }
+                }
+
+                return result;
+            }
+            catch
+            {
+                return new List<Solicitud>();
+            }
+        }
+
         public async Task<List<Solicitud>> GetByUsuarioAsync(int usuarioId)
         {
             try
@@ -52,12 +155,12 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
 
                 var result = solicitudes?.ToList() ?? new List<Solicitud>();
 
-                // Cargar relaciones y detalles para cada solicitud
+               
                 foreach (var solicitud in result)
                 {
                     try
                     {
-                        // Cargar Bodega
+                        
                         if (solicitud.BodegaID > 0)
                         {
                             solicitud.Bodega = await connection.QueryFirstOrDefaultAsync<Bodega>(
@@ -65,7 +168,7 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
                                 new { BodegaID = solicitud.BodegaID });
                         }
 
-                        // Cargar Usuario
+                       
                         if (solicitud.UsuarioID > 0)
                         {
                             solicitud.Usuario = await connection.QueryFirstOrDefaultAsync<Usuario>(
@@ -73,7 +176,7 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
                                 new { UsuarioID = solicitud.UsuarioID });
                         }
 
-                        // Cargar detalles
+                        
                         var detallesSql = @"
                             SELECT 
                                 sd.SolicitudDetalleID,
@@ -98,7 +201,7 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
                     }
                     catch
                     {
-                        // Si falla cargar relaciones, continuar sin ellas
+                        
                         solicitud.Detalles = new List<SolicitudDetalle>();
                     }
                 }
@@ -174,23 +277,22 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
                 splitOn: "EstadoSolicitudID");
 
             var result = solicitud.FirstOrDefault();
-            
-            // Cargar relaciones y detalles
+           
             if (result != null)
             {
-                // Cargar Bodega
+               
                 var bodega = await connection.QueryFirstOrDefaultAsync<Bodega>(
                     "SELECT BodegaID, Nombre, Activo FROM inv.Bodegas WHERE BodegaID = @BodegaID",
                     new { BodegaID = result.BodegaID });
                 result.Bodega = bodega;
 
-                // Cargar Usuario
+                
                 var usuario = await connection.QueryFirstOrDefaultAsync<Usuario>(
                     "SELECT UsuarioID, Nombre FROM inv.Usuarios WHERE UsuarioID = @UsuarioID",
                     new { UsuarioID = result.UsuarioID });
                 result.Usuario = usuario;
 
-                // Cargar UsuarioAprobador si existe
+               
                 if (result.UsuarioAprobadorID.HasValue)
                 {
                     var usuarioAprobador = await connection.QueryFirstOrDefaultAsync<Usuario>(
@@ -199,7 +301,7 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
                     result.UsuarioAprobador = usuarioAprobador;
                 }
 
-                // Cargar detalles
+                
                 var detallesSql = @"
                     SELECT 
                         sd.SolicitudDetalleID,
@@ -244,7 +346,7 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
                 solicitud.Comentarios
             });
 
-            // Insertar detalles
+           
             if (solicitud.Detalles != null && solicitud.Detalles.Any())
             {
                 var detalleSql = @"
@@ -269,7 +371,7 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
         {
             using var connection = _connectionFactory.CreateConnection();
 
-            // Obtener el ID del estado "Pendiente"
+       
             var estadoPendienteId = await connection.QueryFirstOrDefaultAsync<int?>(
                 "SELECT EstadoSolicitudID FROM inv.EstadosSolicitud WHERE Codigo = 'Pendiente'");
 
@@ -285,6 +387,92 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
                 });
 
             return count;
+        }
+
+        public async Task<bool> UpdateEstadoAsync(int solicitudId, int estadoSolicitudId, int? usuarioAprobadorId = null, DateTime? fechaAprobacion = null, DateTime? fechaEnvio = null, DateTime? fechaEntrega = null, string? comentarios = null)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            if (connection.State != System.Data.ConnectionState.Open)
+            {
+                connection.Open();
+            }
+
+            var sql = @"
+                UPDATE inv.Solicitudes 
+                SET EstadoSolicitudID = @EstadoSolicitudID,
+                    UsuarioAprobadorID = @UsuarioAprobadorID,
+                    FechaAprobacionUTC = @FechaAprobacionUTC,
+                    FechaEnvioUTC = @FechaEnvioUTC,
+                    FechaEntregaUTC = @FechaEntregaUTC,
+                    Comentarios = CASE 
+                        WHEN @Comentarios IS NOT NULL AND @Comentarios != '' 
+                        THEN ISNULL(Comentarios + CHAR(13) + CHAR(10) + @Comentarios, @Comentarios)
+                        ELSE Comentarios
+                    END
+                WHERE SolicitudID = @SolicitudID";
+
+            var rowsAffected = await connection.ExecuteAsync(sql, new
+            {
+                SolicitudID = solicitudId,
+                EstadoSolicitudID = estadoSolicitudId,
+                UsuarioAprobadorID = usuarioAprobadorId,
+                FechaAprobacionUTC = fechaAprobacion,
+                FechaEnvioUTC = fechaEnvio,
+                FechaEntregaUTC = fechaEntrega,
+                Comentarios = comentarios
+            });
+
+            return rowsAffected > 0;
+        }
+
+        public async Task<bool> EstablecerCantidadesEnviadasAsync(int solicitudId, Dictionary<int, decimal> cantidades)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                foreach (var kvp in cantidades)
+                {
+                    var sql = @"
+                        UPDATE inv.SolicitudDetalle 
+                        SET CantidadEnviada = @CantidadEnviada
+                        WHERE SolicitudID = @SolicitudID AND ProductoID = @ProductoID";
+
+                    await connection.ExecuteAsync(sql, new
+                    {
+                        SolicitudID = solicitudId,
+                        ProductoID = kvp.Key,
+                        CantidadEnviada = kvp.Value
+                    }, transaction);
+                }
+
+                transaction.Commit();
+                return true;
+            }
+            catch
+            {
+                transaction.Rollback();
+                return false;
+            }
+        }
+
+        public async Task<bool> TieneCantidadesEnviadasAsync(int solicitudId)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            if (connection.State != System.Data.ConnectionState.Open)
+            {
+                connection.Open();
+            }
+
+            var sql = @"
+                SELECT COUNT(1) 
+                FROM inv.SolicitudDetalle 
+                WHERE SolicitudID = @SolicitudID AND CantidadEnviada IS NOT NULL";
+
+            var count = await connection.QueryFirstOrDefaultAsync<int>(sql, new { SolicitudID = solicitudId });
+            return count > 0;
         }
     }
 }

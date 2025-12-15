@@ -32,28 +32,23 @@
 
                     <!-- Usuario -->
                     <div class="col-md-4 mb-3">
-                        <label asp-for="UsuarioID" class="form-label">
+                        <label class="form-label">
                             Usuario <span class="text-danger">*</span>
                         </label>
-                        <select asp-for="UsuarioID"
-                                class="form-select"
-                                asp-items="ViewBag.Usuarios">
-                            <option value="">-- Seleccione --</option>
-                        </select>
+                        <input type="text" class="form-control" value="@ViewBag.UsuarioNombre" readonly />
+                        <input type="hidden" asp-for="UsuarioID" value="@ViewBag.UsuarioID" />
                         <span asp-validation-for="UsuarioID" class="text-danger"></span>
                     </div>
 
                     <!-- Tipo Movimiento -->
                     <div class="col-md-4 mb-3">
-                        <label asp-for="TipoMovimiento" class="form-label">
+                        <label asp-for="TipoMovimientoID" class="form-label">
                             Tipo de Movimiento <span class="text-danger">*</span>
                         </label>
-                        <select asp-for="TipoMovimiento" class="form-select">
+                        <select asp-for="TipoMovimientoID" class="form-select" asp-items="ViewBag.TiposMovimiento" required>
                             <option value="">-- Seleccione --</option>
-                            <option value="Compra">Compra</option>
-                            <option value="Devolucion">Devolución</option>
                         </select>
-                        <span asp-validation-for="TipoMovimiento" class="text-danger"></span>
+                        <span asp-validation-for="TipoMovimientoID" class="text-danger"></span>
                     </div>
 
                     <!-- Cantidad -->
@@ -61,7 +56,7 @@
                         <label asp-for="Cantidad" class="form-label">
                             Cantidad <span class="text-danger">*</span>
                         </label>
-                        <input asp-for="Cantidad" class="form-control" />
+                        <input asp-for="Cantidad" type="number" min="1" step="1" class="form-control" />
                         <span asp-validation-for="Cantidad" class="text-danger"></span>
                     </div>
                 </div>
@@ -83,14 +78,11 @@
 
                     <!-- Bodega -->
                     <div class="col-md-6 mb-3">
-                        <label asp-for="BodegaID" class="form-label">
+                        <label class="form-label">
                             Bodega <span class="text-danger">*</span>
                         </label>
-                        <select asp-for="BodegaID"
-                                class="form-select"
-                                asp-items="ViewBag.Bodegas">
-                            <option value="">-- Seleccione --</option>
-                        </select>
+                        <input type="text" class="form-control" value="@ViewBag.BodegaNombre" readonly />
+                        <input type="hidden" asp-for="BodegaID" value="@ViewBag.BodegaID" />
                         <span asp-validation-for="BodegaID" class="text-danger"></span>
                     </div>
                 </div>

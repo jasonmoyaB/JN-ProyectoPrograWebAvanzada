@@ -1,5 +1,5 @@
 using JN_ProyectoPrograAvanzadaApi_G1.Application.DTOs.Productos;
-
+//servicio de productos
 namespace JN_ProyectoPrograAvanzadaApi_G1.Application.Services
 {
     public interface IProductoService

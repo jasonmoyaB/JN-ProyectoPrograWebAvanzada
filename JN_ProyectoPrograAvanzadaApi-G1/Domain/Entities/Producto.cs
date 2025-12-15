@@ -1,5 +1,7 @@
 namespace JN_ProyectoPrograAvanzadaApi_G1.Domain.Entities
 {
+
+    //producto    
     public class Producto
     {
         public int ProductoID { get; set; }

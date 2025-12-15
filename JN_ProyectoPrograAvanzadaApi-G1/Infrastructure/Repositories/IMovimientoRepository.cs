@@ -1,4 +1,5 @@
 using JN_ProyectoPrograAvanzadaApi_G1.Domain.Entities;
+using System.Data;
 
 namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
 {
@@ -9,6 +10,7 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
         Task<Movimiento?> GetByIdAsync(int movimientoId);
         Task<int> GetCountMovimientosHoyByBodegaAsync(int bodegaId);
         Task<int> GetCountMovimientosHoyByUsuarioAsync(int usuarioId);
+        Task<int> CreateAsync(Movimiento movimiento, IDbTransaction? transaction = null);
     }
 }
 

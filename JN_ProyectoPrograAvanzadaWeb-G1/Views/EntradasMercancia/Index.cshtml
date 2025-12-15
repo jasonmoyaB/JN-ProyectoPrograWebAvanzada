@@ -37,6 +37,14 @@
         </div>
     }
 
+    @if (TempData["Warning"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Warning"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
     <!-- Card principal -->
     <div class="card border-0 shadow-sm">
         <div class="card-body">
@@ -76,7 +84,7 @@
 
                             <td>
                                 <span class="badge bg-info text-dark px-3">
-                                    @e.TipoMovimiento
+                                    @(e.TipoMovimientoNav?.Codigo ?? e.TipoMovimiento ?? "N/A")
                                 </span>
                             </td>
 

@@ -8,11 +8,19 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
     public class ProductosController : Controller
     {
         private readonly IApiProductoService _productoService;
+        private readonly IApiInventarioService _inventarioService;
+        private readonly IApiBodegaService _bodegaService;
         private readonly ILogger<ProductosController> _logger;
 
-        public ProductosController(IApiProductoService productoService, ILogger<ProductosController> logger)
+        public ProductosController(
+            IApiProductoService productoService, 
+            IApiInventarioService inventarioService,
+            IApiBodegaService bodegaService,
+            ILogger<ProductosController> logger)
         {
             _productoService = productoService;
+            _inventarioService = inventarioService;
+            _bodegaService = bodegaService;
             _logger = logger;
         }
 
@@ -271,6 +279,48 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        // GET: Productos/DistribucionBodegas
+        [HttpGet]
+        public async Task<IActionResult> DistribucionBodegas(int id)
+        {
+            var rolId = HttpContext.Session.GetInt32("RolID");
+            if (rolId != 1)
+            {
+                return RedirectToAction("Dashboard", "Tecnico");
+            }
+
+            try
+            {
+                var producto = await _productoService.GetByIdAsync(id);
+                if (producto == null)
+                {
+                    TempData["Error"] = "Producto no encontrado";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                var bodegas = await _bodegaService.GetAllAsync(true);
+                var distribucion = new List<SaldoInventarioDto>();
+
+                foreach (var bodega in bodegas ?? new List<BodegaDto>())
+                {
+                    var saldo = await _inventarioService.GetSaldoByBodegaAndProductoAsync(bodega.BodegaID, id);
+                    if (saldo != null && saldo.Cantidad > 0)
+                    {
+                        distribucion.Add(saldo);
+                    }
+                }
+
+                ViewBag.Producto = producto;
+                return View(distribucion);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener distribución de bodegas para producto {Id}", id);
+                TempData["Error"] = "Error al cargar la distribución de bodegas";
+                return RedirectToAction(nameof(Index));
+            }
         }
     }
 }

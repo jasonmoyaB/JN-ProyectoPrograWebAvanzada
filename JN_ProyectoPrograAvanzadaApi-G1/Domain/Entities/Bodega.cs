@@ -1,5 +1,6 @@
 namespace JN_ProyectoPrograAvanzadaApi_G1.Domain.Entities
 {
+    // Entidad Bodega
     public class Bodega
     {
         public int BodegaID { get; set; }

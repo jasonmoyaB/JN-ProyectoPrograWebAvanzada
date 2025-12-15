@@ -1,5 +1,7 @@
 namespace JN_ProyectoPrograAvanzadaApi_G1.Domain.Entities
 {
+
+
     public class Proveedor
     {
         public int ProveedorID { get; set; }

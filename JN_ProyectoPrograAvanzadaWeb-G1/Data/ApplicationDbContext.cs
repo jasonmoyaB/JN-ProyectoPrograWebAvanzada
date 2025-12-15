@@ -37,12 +37,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Data
 
               
                 entity.Property(e => e.Cantidad)
-                      .HasColumnType("decimal(18,2)");
-
-                
-                entity.Property(e => e.TipoMovimiento)
-                      .HasMaxLength(20)
-                      .IsRequired();
+                      .HasColumnType("int");
 
                 
                 entity.HasOne(e => e.Usuario)
@@ -55,10 +50,19 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Data
                       .HasForeignKey(e => e.ProductoID)
                       .OnDelete(DeleteBehavior.Restrict);
 
-                
                 entity.HasOne(e => e.Bodega)
                       .WithMany()
                       .HasForeignKey(e => e.BodegaID)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(e => e.TipoMovimiento)
+                      .HasMaxLength(20)
+                      .IsRequired()
+                      .HasColumnType("varchar");
+
+                entity.HasOne(e => e.TipoMovimientoNav)
+                      .WithMany()
+                      .HasForeignKey(e => e.TipoMovimientoID)
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
@@ -104,6 +108,15 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Data
                 entity.HasIndex(e => e.OccurredAt);
                 entity.HasIndex(e => e.Username);
                 entity.HasIndex(e => new { e.EntityName, e.EntityId });
+            });
+
+            // Configurar TipoMovimiento
+            modelBuilder.Entity<TipoMovimiento>(entity =>
+            {
+                entity.ToTable("TiposMovimiento", "inv");
+                entity.HasKey(e => e.TipoMovimientoID);
+                entity.Property(e => e.Codigo).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Naturaleza).IsRequired();
             });
         }
     }

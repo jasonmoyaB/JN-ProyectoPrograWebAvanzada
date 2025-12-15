@@ -1,0 +1,506 @@
+@model JN_ProyectoPrograAvanzadaWeb_G1.Services.SolicitudDto
+@{
+    ViewData["Title"] = "Detalle de Solicitud";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    
+    var stockBodegaGeneral = ViewBag.StockBodegaGeneral as Dictionary<int, decimal> ?? new Dictionary<int, decimal>();
+    var tieneCantidadesEnviadas = ViewBag.TieneCantidadesEnviadas as bool? ?? false;
+  
+    var puedeEstablecerCantidades = (Model.EstadoCodigo == "Pendiente" || Model.EstadoCodigo == "Aprobada") && !tieneCantidadesEnviadas;
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h2 class="mb-0 text-secondary">
+            <i class="bi bi-clipboard-check me-2"></i>Gestionar Solicitud #@Model.SolicitudID
+        </h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Volver
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-8">
+            <!--  General -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Información General</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Estado:</strong>
+                            @{
+                                var estadoClass = Model.EstadoCodigo switch
+                                {
+                                    "Pendiente" => "bg-warning",
+                                    "Aprobada" => "bg-success",
+                                    "Rechazada" => "bg-danger",
+                                    "EnProceso" => "bg-info",
+                                    "Finalizada" => "bg-secondary",
+                                    _ => "bg-secondary"
+                                };
+                            }
+                            <span class="badge @estadoClass ms-2">@Model.EstadoCodigo</span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Fecha Creación:</strong>
+                            <span class="ms-2">@Model.FechaCreacionUTC.ToCostaRicaTime().ToString("dd/MM/yyyy HH:mm")</span>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Técnico:</strong>
+                            <span class="ms-2">@Model.UsuarioNombre</span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Bodega:</strong>
+                            <span class="ms-2">@Model.BodegaNombre</span>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Comentarios))
+                    {
+                        <div class="mb-2">
+                            <strong>Comentarios:</strong>
+                            <div class="mt-1 p-2 bg-light rounded border-start border-3 border-info">
+                                <p class="mb-0 small">@Model.Comentarios</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Productos Solicitados -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Productos Solicitados</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Detalles != null && Model.Detalles.Any())
+                    {
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>SKU</th>
+                                    <th>Producto</th>
+                                    <th class="text-end">Cantidad Solicitada</th>
+                                    <th class="text-end">Stock Disponible</th>
+                                    <th class="text-end">Cantidad a Enviar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var detalle in Model.Detalles)
+                                {
+                                    var stockDisponible = stockBodegaGeneral.ContainsKey(detalle.ProductoID) 
+                                        ? stockBodegaGeneral[detalle.ProductoID] 
+                                        : 0;
+                                    <tr>
+                                        <td><strong>@detalle.ProductoSKU</strong></td>
+                                        <td>@detalle.ProductoNombre</td>
+                                        <td class="text-end">@detalle.CantidadSolicitada.ToString("N0")</td>
+                                        <td class="text-end">
+                                            <span class="badge @(stockDisponible > 0 ? "bg-success" : "bg-danger")">
+                                                @stockDisponible.ToString("N0")
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            @if (detalle.CantidadEnviada.HasValue)
+                                            {
+                                                <span class="badge bg-primary">@detalle.CantidadEnviada.Value.ToString("N0")</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="2">Total</th>
+                                    <th class="text-end">@Model.Detalles.Sum(d => d.CantidadSolicitada).ToString("N0")</th>
+                                    <th></th>
+                                    <th class="text-end">
+                                        @if (Model.Detalles.Any(d => d.CantidadEnviada.HasValue))
+                                        {
+                                            <strong>@Model.Detalles.Where(d => d.CantidadEnviada.HasValue).Sum(d => d.CantidadEnviada.Value).ToString("N0")</strong>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info" role="alert">
+                            <i class="bi bi-info-circle me-2"></i>Esta solicitud no tiene productos asociados.
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Establecer Cantidades a Enviar -->
+            @if (puedeEstablecerCantidades)
+            {
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">Establecer Cantidades a Enviar</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning alert-sm mb-3">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <small>Una vez guardadas las cantidades, no podrán ser modificadas.</small>
+                        </div>
+                        <form asp-action="EstablecerCantidadesEnviadas" method="post" id="formCantidades">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.SolicitudID" />
+                            <input type="hidden" asp-for="SolicitudID" />
+                            
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th class="text-end">Solicitado</th>
+                                            <th class="text-end">Stock Disponible</th>
+                                            <th class="text-end">Cantidad a Enviar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var detalle in Model.Detalles)
+                                        {
+                                            var stockDisponible = stockBodegaGeneral.ContainsKey(detalle.ProductoID) 
+                                                ? stockBodegaGeneral[detalle.ProductoID] 
+                                                : 0;
+                                            <tr>
+                                                <td>
+                                                    <strong>@detalle.ProductoNombre</strong><br />
+                                                    <small class="text-muted">SKU: @detalle.ProductoSKU</small>
+                                                </td>
+                                                <td class="text-end align-middle">
+                                                    <span class="badge bg-secondary">@detalle.CantidadSolicitada.ToString("N0")</span>
+                                                </td>
+                                                <td class="text-end align-middle">
+                                                    <span class="badge @(stockDisponible > 0 ? "bg-success" : "bg-danger")">
+                                                        @stockDisponible.ToString("N0")
+                                                    </span>
+                                                </td>
+                                                <td class="text-end align-middle">
+                                                    <input type="number" 
+                                                           name="cantidades_@detalle.ProductoID" 
+                                                           class="form-control form-control-sm cantidad-enviar" 
+                                                           id="cantidad_@detalle.ProductoID"
+                                                           data-producto-id="@detalle.ProductoID"
+                                                           min="0" 
+                                                           max="@((int)stockDisponible)" 
+                                                           step="1"
+                                                           value="@((int)(detalle.CantidadEnviada.HasValue ? detalle.CantidadEnviada.Value : (stockDisponible > 0 ? Math.Min(detalle.CantidadSolicitada, stockDisponible) : 0)))"
+                                                           data-stock="@((int)stockDisponible)"
+                                                           data-solicitado="@((int)detalle.CantidadSolicitada)"
+                                                           style="width: 100px; display: inline-block;" 
+                                                           required />
+                                                    <small class="d-block text-muted mt-1">
+                                                        Máx: @((int)stockDisponible)
+                                                    </small>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-save me-1"></i>Guardar Cantidades
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            }
+            else if (tieneCantidadesEnviadas)
+            {
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Cantidades Establecidas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>Las cantidades a enviar ya han sido establecidas y no pueden ser modificadas.
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th class="text-end">Solicitado</th>
+                                        <th class="text-end">Cantidad a Enviar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var detalle in Model.Detalles)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@detalle.ProductoNombre</strong><br />
+                                                <small class="text-muted">SKU: @detalle.ProductoSKU</small>
+                                            </td>
+                                            <td class="text-end align-middle">
+                                                <span class="badge bg-secondary">@detalle.CantidadSolicitada.ToString("N0")</span>
+                                            </td>
+                                            <td class="text-end align-middle">
+                                                @if (detalle.CantidadEnviada.HasValue)
+                                                {
+                                                    <span class="badge bg-primary">@((int)detalle.CantidadEnviada.Value)</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-md-4">
+            <!-- Acciones -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Acciones</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.EstadoCodigo == "Pendiente")
+                    {
+                        <form asp-action="Aprobar" method="post" class="mb-2" id="formAprobar">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.SolicitudID" />
+                            <div class="mb-2">
+                                <label for="comentariosAprobar" class="form-label small">Comentarios (opcional):</label>
+                                <textarea name="comentarios" id="comentariosAprobar" class="form-control form-control-sm" rows="2" placeholder="Agregar comentarios..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success btn-sm w-100">
+                                <i class="bi bi-check-circle me-1"></i>Aprobar
+                            </button>
+                        </form>
+                        
+                        <form asp-action="Rechazar" method="post" id="formRechazar">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.SolicitudID" />
+                            <div class="mb-2">
+                                <label for="comentariosRechazar" class="form-label small">Comentarios (opcional):</label>
+                                <textarea name="comentarios" id="comentariosRechazar" class="form-control form-control-sm" rows="2" placeholder="Agregar comentarios..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-danger btn-sm w-100" onclick="return confirm('¿Está seguro de rechazar esta solicitud?');">
+                                <i class="bi bi-x-circle me-1"></i>Rechazar
+                            </button>
+                        </form>
+                    }
+                    else if (Model.EstadoCodigo == "Aprobada" && tieneCantidadesEnviadas)
+                    {
+                        <form asp-action="Enviar" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.SolicitudID" />
+                            <button type="submit" class="btn btn-primary btn-sm w-100" onclick="return confirm('¿Está seguro de enviar esta solicitud? Esto creará los movimientos de inventario.');">
+                                <i class="bi bi-send me-1"></i>Enviar Solicitud
+                            </button>
+                        </form>
+                    }
+                    else if (Model.EstadoCodigo == "EnProceso")
+                    {
+                        <form asp-action="Entregar" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.SolicitudID" />
+                            <button type="submit" class="btn btn-success btn-sm w-100" onclick="return confirm('¿Está seguro de marcar esta solicitud como entregada?');">
+                                <i class="bi bi-check2-circle me-1"></i>Marcar como Entregada
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>No hay acciones disponibles para este estado.
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Historial -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Historial</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Fecha Creación:</strong>
+                        <p class="mb-0">@Model.FechaCreacionUTC.ToCostaRicaTime().ToString("dd/MM/yyyy HH:mm")</p>
+                    </div>
+                    @if (Model.FechaAprobacionUTC.HasValue)
+                    {
+                        <div class="mb-3">
+                            <strong>Fecha Aprobación:</strong>
+                            <p class="mb-0">@Model.FechaAprobacionUTC.Value.ToCostaRicaTime().ToString("dd/MM/yyyy HH:mm")</p>
+                            @if (!string.IsNullOrEmpty(Model.UsuarioAprobadorNombre))
+                            {
+                                <small class="text-muted">Por: @Model.UsuarioAprobadorNombre</small>
+                            }
+                        </div>
+                    }
+                    @if (Model.FechaEnvioUTC.HasValue)
+                    {
+                        <div class="mb-3">
+                            <strong>Fecha Envío:</strong>
+                            <p class="mb-0">@Model.FechaEnvioUTC.Value.ToCostaRicaTime().ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+                    }
+                    @if (Model.FechaEntregaUTC.HasValue)
+                    {
+                        <div class="mb-3">
+                            <strong>Fecha Entrega:</strong>
+                            <p class="mb-0">@Model.FechaEntregaUTC.Value.ToCostaRicaTime().ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            
+            @if (tieneCantidadesEnviadas)
+            {
+                <text>
+                $('.cantidad-enviar').prop('disabled', true).addClass('bg-light');
+                </text>
+            }
+
+            $('.cantidad-enviar').on('input', function () {
+                const $input = $(this);
+                if ($input.prop('disabled')) return; 
+                
+                const stock = parseInt($input.data('stock')) || 0;
+                const solicitado = parseInt($input.data('solicitado')) || 0;
+                let valor = parseInt($input.val()) || 0;
+                
+                
+                if (isNaN(valor) || valor % 1 !== 0) {
+                    valor = Math.floor(valor);
+                }
+                
+                
+                if (valor > stock) {
+                    $input.addClass('is-invalid');
+                    valor = stock;
+                    $input.val(valor);
+                } else if (valor < 0) {
+                    $input.addClass('is-invalid');
+                    valor = 0;
+                    $input.val(valor);
+                } else {
+                    $input.removeClass('is-invalid');
+                    
+                    $input.val(Math.floor(valor));
+                }
+                
+                
+                const $small = $input.siblings('small');
+                if ($small.length) {
+                    $small.text('Máx: ' + stock.toLocaleString('es-CR'));
+                }
+            });
+            
+           
+            $('.cantidad-enviar').on('keypress', function (e) {
+                const $input = $(this);
+                if ($input.prop('disabled')) return; 
+                
+                
+                if ([8, 9, 27, 13].indexOf(e.keyCode) !== -1 ||
+                    
+                    (e.keyCode === 65 && e.ctrlKey === true) ||
+                    (e.keyCode === 67 && e.ctrlKey === true) ||
+                    (e.keyCode === 86 && e.ctrlKey === true) ||
+                    (e.keyCode === 88 && e.ctrlKey === true) ||
+                    
+                    (e.keyCode >= 35 && e.keyCode <= 39)) {
+                    return;
+                }
+                
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
+                }
+            });
+
+            
+            $('#formCantidades').on('submit', function (e) {
+                let hayErrores = false;
+                let mensajeError = '';
+                
+                $('.cantidad-enviar').each(function () {
+                    const $input = $(this);
+                    if ($input.prop('disabled')) return; 
+                    
+                    const stock = parseInt($input.data('stock')) || 0;
+                    let valor = parseInt($input.val()) || 0;
+                    
+                    
+                    valor = Math.floor(valor);
+                    $input.val(valor);
+                    
+                    if (valor > stock) {
+                        $input.addClass('is-invalid');
+                        hayErrores = true;
+                        mensajeError += `La cantidad para ${$input.closest('tr').find('strong').text()} excede el stock disponible (${stock}).\n`;
+                    } else if (valor < 0) {
+                        $input.addClass('is-invalid');
+                        hayErrores = true;
+                        mensajeError += `La cantidad no puede ser negativa.\n`;
+                    } else if (valor === 0) {
+                        
+                        if (!confirm('¿Está seguro de enviar 0 unidades para este producto?')) {
+                            e.preventDefault();
+                            return false;
+                        }
+                    }
+                });
+
+                if (hayErrores) {
+                    e.preventDefault();
+                    alert('Por favor, corrija los siguientes errores:\n\n' + mensajeError);
+                    return false;
+                }
+                
+                
+            });
+        });
+    </script>
+}

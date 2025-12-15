@@ -1,5 +1,7 @@
 namespace JN_ProyectoPrograAvanzadaApi_G1.Domain.Entities
 {
+
+    //
     public class EstadoSolicitud
     {
         public int EstadoSolicitudID { get; set; }

@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿
+
+using System.ComponentModel.DataAnnotations;
 
 namespace JN_ProyectoPrograAvanzadaWeb_G1.Models.ViewModels
 {

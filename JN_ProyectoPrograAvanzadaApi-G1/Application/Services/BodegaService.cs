@@ -1,7 +1,7 @@
 using JN_ProyectoPrograAvanzadaApi_G1.Application.DTOs.Bodegas;
 using JN_ProyectoPrograAvanzadaApi_G1.Domain.Entities;
 using JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories;
-
+//Bodegas
 namespace JN_ProyectoPrograAvanzadaApi_G1.Application.Services
 {
     public class BodegaService : IBodegaService

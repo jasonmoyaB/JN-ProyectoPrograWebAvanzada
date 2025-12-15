@@ -1,3 +1,5 @@
+
+
 using JN_ProyectoPrograAvanzadaApi_G1.Domain.Entities;
 
 namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories

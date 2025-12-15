@@ -1,5 +1,7 @@
 namespace JN_ProyectoPrograAvanzadaApi_G1.Domain.Entities
 {
+
+    //Ajuste por motivo de inventario
     public class MotivoAjuste
     {
         public int MotivoAjusteID { get; set; }

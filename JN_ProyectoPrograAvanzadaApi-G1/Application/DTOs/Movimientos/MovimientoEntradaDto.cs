@@ -1,3 +1,6 @@
+
+
+
 using System.ComponentModel.DataAnnotations;
 
 namespace JN_ProyectoPrograAvanzadaApi_G1.Application.DTOs.Movimientos
@@ -21,8 +24,13 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Application.DTOs.Movimientos
 
     public class MovimientoDetalleDto
     {
+        public int MovimientoDetalleID { get; set; }
+        
         [Required]
         public int ProductoID { get; set; }
+
+        public string ProductoNombre { get; set; } = string.Empty;
+        public string ProductoSKU { get; set; } = string.Empty;
 
         public int? UbicacionID { get; set; }
 

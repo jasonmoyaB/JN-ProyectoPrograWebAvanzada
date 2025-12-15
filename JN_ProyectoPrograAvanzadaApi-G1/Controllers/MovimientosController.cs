@@ -101,6 +101,45 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Controllers
                 return StatusCode(500, new { message = "Error al obtener conteo" });
             }
         }
+
+        [HttpPost("traslado")]
+        public async Task<ActionResult> CreateTraslado([FromBody] CrearTrasladoRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var dto = request.Dto;
+                var usuarioId = request.UsuarioID;
+
+                if (dto.BodegaOrigenID == dto.BodegaDestinoID)
+                {
+                    return BadRequest(new { message = "La bodega de origen y destino deben ser diferentes" });
+                }
+
+                if (dto.Detalles == null || !dto.Detalles.Any())
+                {
+                    return BadRequest(new { message = "Debe incluir al menos un producto para el traslado" });
+                }
+
+                var movimientoId = await _movimientoService.CreateTrasladoAsync(dto, usuarioId);
+                return Ok(new { message = "Traslado creado exitosamente", movimientoId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al crear traslado");
+                return StatusCode(500, new { message = "Error al crear el traslado: " + ex.Message });
+            }
+        }
+    }
+
+    public class CrearTrasladoRequest
+    {
+        public MovimientoTrasladoDto Dto { get; set; } = new MovimientoTrasladoDto();
+        public int UsuarioID { get; set; }
     }
 }
 

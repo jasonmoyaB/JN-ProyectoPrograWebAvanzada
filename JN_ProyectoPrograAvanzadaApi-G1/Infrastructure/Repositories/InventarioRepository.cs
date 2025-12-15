@@ -29,7 +29,7 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
             }
             catch
             {
-                // Si el stored procedure no existe, retornar lista vacía
+                
                 return new List<SaldoInventario>();
             }
         }
@@ -62,7 +62,7 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
             }
             catch
             {
-                // Si el stored procedure no existe, retornar lista vacía
+               
                 return new List<SaldoInventario>();
             }
         }

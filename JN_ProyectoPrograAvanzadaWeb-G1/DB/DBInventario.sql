@@ -123,7 +123,7 @@ END
 GO
 
 ------------------------------------------------------
--- 3. Catálogo de estados de solicitud 
+-- 3. Catï¿½logo de estados de solicitud 
 ------------------------------------------------------
 IF OBJECT_ID('inv.EstadosSolicitud','U') IS NULL
 BEGIN
@@ -143,9 +143,23 @@ BEGIN
     CREATE TABLE inv.Solicitudes(
         SolicitudID       INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_Solicitudes PRIMARY KEY,
         EstadoSolicitudID INT               NOT NULL,
+        BodegaID          INT               NOT NULL,
+        UsuarioID         INT               NOT NULL,
         FechaCreacionUTC  DATETIME2         NOT NULL CONSTRAINT DF_Solicitudes_Fecha DEFAULT (SYSUTCDATETIME()),
+        FechaAprobacionUTC DATETIME2        NULL,
+        FechaEnvioUTC     DATETIME2         NULL,
+        FechaEntregaUTC   DATETIME2         NULL,
+        Comentarios       NVARCHAR(255)     NULL,
+        UsuarioAprobadorID INT              NULL,
+        DespachoID        INT               NULL,
         CONSTRAINT FK_Solicitudes_EstadoSolicitud 
-            FOREIGN KEY (EstadoSolicitudID) REFERENCES inv.EstadosSolicitud(EstadoSolicitudID)
+            FOREIGN KEY (EstadoSolicitudID) REFERENCES inv.EstadosSolicitud(EstadoSolicitudID),
+        CONSTRAINT FK_Solicitudes_Bodega 
+            FOREIGN KEY (BodegaID) REFERENCES inv.Bodegas(BodegaID),
+        CONSTRAINT FK_Solicitudes_Usuario 
+            FOREIGN KEY (UsuarioID) REFERENCES inv.Usuarios(UsuarioID),
+        CONSTRAINT FK_Solicitudes_UsuarioAprobador 
+            FOREIGN KEY (UsuarioAprobadorID) REFERENCES inv.Usuarios(UsuarioID)
     );
 END
 GO
@@ -292,14 +306,23 @@ END
 GO
 
 ------------------------------------------------------
--- 8. VISTA de saldo (stub)
+-- 8. VISTA de saldo de inventario
+-- Calcula el inventario real basÃ¡ndose en los movimientos
 ------------------------------------------------------
 IF OBJECT_ID('inv.v_SaldoInventario','V') IS NOT NULL 
     DROP VIEW inv.v_SaldoInventario;
 GO
 
 CREATE VIEW inv.v_SaldoInventario AS
-SELECT 1 AS BodegaID, 1 AS ProductoID, CAST(100.0 AS DECIMAL(18,4)) AS Cantidad;
+SELECT 
+    m.BodegaID,
+    md.ProductoID,
+    SUM(md.Cantidad * tm.Naturaleza) AS Cantidad
+FROM inv.Movimientos m
+INNER JOIN inv.MovimientoDetalle md ON md.MovimientoID = m.MovimientoID
+INNER JOIN inv.TiposMovimiento tm ON tm.TipoMovimientoID = m.TipoMovimientoID
+GROUP BY m.BodegaID, md.ProductoID
+HAVING SUM(md.Cantidad * tm.Naturaleza) > 0;  -- Solo mostrar productos con stock positivo
 GO
 
 ------------------------------------------------------

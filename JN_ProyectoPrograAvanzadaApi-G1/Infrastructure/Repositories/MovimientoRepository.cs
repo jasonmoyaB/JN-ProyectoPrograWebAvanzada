@@ -31,12 +31,9 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
                         m.Observaciones,
                         m.BodegaRelacionadaID,
                         m.ProveedorID,
-                        m.SolicitudID,
                         tm.TipoMovimientoID,
                         tm.Codigo,
-                        tm.Nombre,
-                        tm.Naturaleza,
-                        tm.Activo
+                        tm.Naturaleza
                     FROM inv.Movimientos m
                     LEFT JOIN inv.TiposMovimiento tm ON m.TipoMovimientoID = tm.TipoMovimientoID
                     WHERE m.BodegaID = @BodegaID
@@ -61,22 +58,50 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
 
                 var result = movimientos?.ToList() ?? new List<Movimiento>();
 
-                // Cargar relaciones adicionales
+           
                 foreach (var movimiento in result)
                 {
                     try
                     {
-                        // Cargar Usuario
+                        
                         if (movimiento.UsuarioID > 0)
                         {
                             movimiento.Usuario = await connection.QueryFirstOrDefaultAsync<Usuario>(
                                 "SELECT UsuarioID, Nombre FROM inv.Usuarios WHERE UsuarioID = @UsuarioID",
                                 new { UsuarioID = movimiento.UsuarioID });
                         }
+
+                        
+                        if (movimiento.BodegaID > 0)
+                        {
+                            movimiento.Bodega = await connection.QueryFirstOrDefaultAsync<Bodega>(
+                                "SELECT BodegaID, Nombre FROM inv.Bodegas WHERE BodegaID = @BodegaID",
+                                new { BodegaID = movimiento.BodegaID });
+                        }
+
+                       
+                        if (movimiento.BodegaRelacionadaID.HasValue && movimiento.BodegaRelacionadaID.Value > 0)
+                        {
+                            movimiento.BodegaRelacionada = await connection.QueryFirstOrDefaultAsync<Bodega>(
+                                "SELECT BodegaID, Nombre FROM inv.Bodegas WHERE BodegaID = @BodegaID",
+                                new { BodegaID = movimiento.BodegaRelacionadaID.Value });
+                        }
+
+                       
+                        var detalles = await connection.QueryAsync<MovimientoDetalle, Producto, MovimientoDetalle>(
+                            @"SELECT md.MovimientoDetalleID, md.MovimientoID, md.ProductoID, md.Cantidad,
+                                     p.ProductoID, p.Nombre, p.SKU
+                              FROM inv.MovimientoDetalle md
+                              LEFT JOIN inv.Productos p ON md.ProductoID = p.ProductoID
+                              WHERE md.MovimientoID = @MovimientoID",
+                            (md, p) => { md.Producto = p; return md; },
+                            new { MovimientoID = movimiento.MovimientoID },
+                            splitOn: "ProductoID");
+                        movimiento.Detalles = detalles?.ToList() ?? new List<MovimientoDetalle>();
                     }
                     catch
                     {
-                        // Si falla cargar el usuario, continuar sin él
+                        
                     }
                 }
 
@@ -105,12 +130,9 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
                         m.Observaciones,
                         m.BodegaRelacionadaID,
                         m.ProveedorID,
-                        m.SolicitudID,
                         tm.TipoMovimientoID,
                         tm.Codigo,
-                        tm.Nombre,
-                        tm.Naturaleza,
-                        tm.Activo
+                        tm.Naturaleza
                     FROM inv.Movimientos m
                     LEFT JOIN inv.TiposMovimiento tm ON m.TipoMovimientoID = tm.TipoMovimientoID
                     WHERE m.UsuarioID = @UsuarioID
@@ -135,22 +157,50 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
 
                 var result = movimientos?.ToList() ?? new List<Movimiento>();
 
-                // Cargar relaciones adicionales
+                
                 foreach (var movimiento in result)
                 {
                     try
                     {
-                        // Cargar Usuario
+                        
                         if (movimiento.UsuarioID > 0)
                         {
                             movimiento.Usuario = await connection.QueryFirstOrDefaultAsync<Usuario>(
                                 "SELECT UsuarioID, Nombre FROM inv.Usuarios WHERE UsuarioID = @UsuarioID",
                                 new { UsuarioID = movimiento.UsuarioID });
                         }
+
+                        
+                        if (movimiento.BodegaID > 0)
+                        {
+                            movimiento.Bodega = await connection.QueryFirstOrDefaultAsync<Bodega>(
+                                "SELECT BodegaID, Nombre FROM inv.Bodegas WHERE BodegaID = @BodegaID",
+                                new { BodegaID = movimiento.BodegaID });
+                        }
+
+                        
+                        if (movimiento.BodegaRelacionadaID.HasValue && movimiento.BodegaRelacionadaID.Value > 0)
+                        {
+                            movimiento.BodegaRelacionada = await connection.QueryFirstOrDefaultAsync<Bodega>(
+                                "SELECT BodegaID, Nombre FROM inv.Bodegas WHERE BodegaID = @BodegaID",
+                                new { BodegaID = movimiento.BodegaRelacionadaID.Value });
+                        }
+
+                        
+                        var detalles = await connection.QueryAsync<MovimientoDetalle, Producto, MovimientoDetalle>(
+                            @"SELECT md.MovimientoDetalleID, md.MovimientoID, md.ProductoID, md.Cantidad,
+                                     p.ProductoID, p.Nombre, p.SKU
+                              FROM inv.MovimientoDetalle md
+                              LEFT JOIN inv.Productos p ON md.ProductoID = p.ProductoID
+                              WHERE md.MovimientoID = @MovimientoID",
+                            (md, p) => { md.Producto = p; return md; },
+                            new { MovimientoID = movimiento.MovimientoID },
+                            splitOn: "ProductoID");
+                        movimiento.Detalles = detalles?.ToList() ?? new List<MovimientoDetalle>();
                     }
                     catch
                     {
-                        // Si falla cargar el usuario, continuar sin él
+                        
                     }
                 }
 
@@ -177,12 +227,9 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
                     m.Observaciones,
                     m.BodegaRelacionadaID,
                     m.ProveedorID,
-                    m.SolicitudID,
                     tm.TipoMovimientoID,
                     tm.Codigo,
-                    tm.Nombre,
-                    tm.Naturaleza,
-                    tm.Activo
+                    tm.Naturaleza
                 FROM inv.Movimientos m
                 LEFT JOIN inv.TiposMovimiento tm ON m.TipoMovimientoID = tm.TipoMovimientoID
                 WHERE m.MovimientoID = @MovimientoID";
@@ -193,7 +240,54 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
                 new { MovimientoID = movimientoId },
                 splitOn: "TipoMovimientoID");
 
-            return movimiento.FirstOrDefault();
+            var result = movimiento.FirstOrDefault();
+            if (result != null)
+            {
+                try
+                {
+                    
+                    if (result.UsuarioID > 0)
+                    {
+                        result.Usuario = await connection.QueryFirstOrDefaultAsync<Usuario>(
+                            "SELECT UsuarioID, Nombre FROM inv.Usuarios WHERE UsuarioID = @UsuarioID",
+                            new { UsuarioID = result.UsuarioID });
+                    }
+
+                  
+                    if (result.BodegaID > 0)
+                    {
+                        result.Bodega = await connection.QueryFirstOrDefaultAsync<Bodega>(
+                            "SELECT BodegaID, Nombre FROM inv.Bodegas WHERE BodegaID = @BodegaID",
+                            new { BodegaID = result.BodegaID });
+                    }
+
+                    
+                    if (result.BodegaRelacionadaID.HasValue && result.BodegaRelacionadaID.Value > 0)
+                    {
+                        result.BodegaRelacionada = await connection.QueryFirstOrDefaultAsync<Bodega>(
+                            "SELECT BodegaID, Nombre FROM inv.Bodegas WHERE BodegaID = @BodegaID",
+                            new { BodegaID = result.BodegaRelacionadaID.Value });
+                    }
+
+                    
+                    var detalles = await connection.QueryAsync<MovimientoDetalle, Producto, MovimientoDetalle>(
+                        @"SELECT md.MovimientoDetalleID, md.MovimientoID, md.ProductoID, md.Cantidad,
+                                 p.ProductoID, p.Nombre, p.SKU
+                          FROM inv.MovimientoDetalle md
+                          LEFT JOIN inv.Productos p ON md.ProductoID = p.ProductoID
+                          WHERE md.MovimientoID = @MovimientoID",
+                        (md, p) => { md.Producto = p; return md; },
+                        new { MovimientoID = result.MovimientoID },
+                        splitOn: "ProductoID");
+                    result.Detalles = detalles?.ToList() ?? new List<MovimientoDetalle>();
+                }
+                catch
+                {
+                    
+                }
+            }
+
+            return result;
         }
 
         public async Task<int> GetCountMovimientosHoyByBodegaAsync(int bodegaId)
@@ -232,6 +326,73 @@ namespace JN_ProyectoPrograAvanzadaApi_G1.Infrastructure.Repositories
                 });
 
             return count;
+        }
+
+        public async Task<int> CreateAsync(Movimiento movimiento, IDbTransaction? transaction = null)
+        {
+            IDbConnection connection;
+            bool shouldDispose = false;
+
+            if (transaction != null)
+            {
+                connection = transaction.Connection!;
+            }
+            else
+            {
+                connection = _connectionFactory.CreateConnection();
+                shouldDispose = true;
+            }
+
+            try
+            {
+                var sql = @"
+                    INSERT INTO inv.Movimientos (BodegaID, TipoMovimientoID, UsuarioID, FechaMovimientoUTC, Referencia, Observaciones, BodegaRelacionadaID, ProveedorID)
+                    VALUES (@BodegaID, @TipoMovimientoID, @UsuarioID, @FechaMovimientoUTC, @Referencia, @Observaciones, @BodegaRelacionadaID, @ProveedorID);
+                    SELECT CAST(SCOPE_IDENTITY() as int);";
+
+                var movimientoId = await connection.QuerySingleAsync<int>(sql, new
+                {
+                    movimiento.BodegaID,
+                    movimiento.TipoMovimientoID,
+                    movimiento.UsuarioID,
+                    movimiento.FechaMovimientoUTC,
+                    movimiento.Referencia,
+                    movimiento.Observaciones,
+                    movimiento.BodegaRelacionadaID,
+                    movimiento.ProveedorID
+                }, transaction);
+
+                
+                if (movimiento.Detalles != null && movimiento.Detalles.Any())
+                {
+                    var detalleSql = @"
+                        INSERT INTO inv.MovimientoDetalle (MovimientoID, ProductoID, UbicacionID, UnidadID, Cantidad, CostoUnitario, MotivoAjusteID)
+                        VALUES (@MovimientoID, @ProductoID, @UbicacionID, @UnidadID, @Cantidad, @CostoUnitario, @MotivoAjusteID);";
+
+                    foreach (var detalle in movimiento.Detalles)
+                    {
+                        await connection.ExecuteAsync(detalleSql, new
+                        {
+                            MovimientoID = movimientoId,
+                            detalle.ProductoID,
+                            detalle.UbicacionID,
+                            detalle.UnidadID,
+                            detalle.Cantidad,
+                            detalle.CostoUnitario,
+                            detalle.MotivoAjusteID
+                        }, transaction);
+                    }
+                }
+
+                return movimientoId;
+            }
+            finally
+            {
+                if (shouldDispose)
+                {
+                    connection?.Dispose();
+                }
+            }
         }
     }
 }

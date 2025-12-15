@@ -27,8 +27,7 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
             _productoService = productoService;
         }
 
-        /// Dashboard principal para Técnicos
-        /// Solo accesible para usuarios con RolID = 2 (Técnico)
+
         [HttpGet]
         public async Task<IActionResult> Dashboard()
         {
@@ -132,7 +131,10 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
                     return RedirectToAction(nameof(Dashboard));
                 }
 
+                _logger.LogInformation("Técnico: Obteniendo movimientos para bodega {BodegaId}", bodegaId.Value);
                 var movimientos = await _movimientoService.GetByBodegaAsync(bodegaId.Value, fechaDesde, fechaHasta);
+                _logger.LogInformation("Técnico: Se encontraron {Count} movimientos para bodega {BodegaId}", movimientos?.Count ?? 0, bodegaId.Value);
+                
                 ViewBag.BodegaNombre = HttpContext.Session.GetString("BodegaNombre") ?? "Mi Bodega";
                 ViewBag.FechaDesde = fechaDesde;
                 ViewBag.FechaHasta = fechaHasta;
@@ -142,7 +144,8 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
             {
                 _logger.LogError(ex, "Error al cargar movimientos: {Message}", ex.Message);
                 TempData["Error"] = $"Error al cargar los movimientos: {ex.Message}";
-                return RedirectToAction(nameof(Dashboard));
+                ViewBag.BodegaNombre = HttpContext.Session.GetString("BodegaNombre") ?? "Mi Bodega";
+                return View(new List<MovimientoDto>());
             }
         }
 
@@ -197,7 +200,31 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
                 }
 
                 var productos = await _productoService.GetAllAsync(true);
-                ViewBag.Productos = productos ?? new List<ProductoDto>();
+                _logger.LogInformation("Productos cargados para solicitud: {Count}", productos?.Count ?? 0);
+                
+                if (productos == null || !productos.Any())
+                {
+                    _logger.LogWarning("No se encontraron productos activos para la solicitud");
+                    TempData["Warning"] = "No hay productos disponibles. Contacta al administrador.";
+                }
+
+                
+                var inventarioBodegaGeneral = await _inventarioService.GetSaldoByBodegaAsync(1);
+                
+               
+                var productosConStock = productos != null ? productos.Select(p =>
+                {
+                    var saldo = inventarioBodegaGeneral?.FirstOrDefault(i => i.ProductoID == p.ProductoID);
+                    return new
+                    {
+                        p.ProductoID,
+                        p.SKU,
+                        p.Nombre,
+                        CantidadDisponible = saldo?.Cantidad ?? 0
+                    };
+                }).Cast<object>().ToList() : new List<object>();
+                
+                ViewBag.Productos = productosConStock;
                 ViewBag.BodegaID = bodegaId.Value;
                 ViewBag.BodegaNombre = HttpContext.Session.GetString("BodegaNombre") ?? "Mi Bodega";
                 return View(new CrearSolicitudDto { BodegaID = bodegaId.Value });
@@ -233,7 +260,21 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
                 if (!ModelState.IsValid)
                 {
                     var productos = await _productoService.GetAllAsync(true);
-                    ViewBag.Productos = productos ?? new List<ProductoDto>();
+                    var inventarioBodegaGeneral = await _inventarioService.GetSaldoByBodegaAsync(1);
+                    
+                    var productosConStock = productos != null ? productos.Select(p =>
+                    {
+                        var saldo = inventarioBodegaGeneral?.FirstOrDefault(i => i.ProductoID == p.ProductoID);
+                        return new
+                        {
+                            p.ProductoID,
+                            p.SKU,
+                            p.Nombre,
+                            CantidadDisponible = saldo?.Cantidad ?? 0
+                        };
+                    }).Cast<object>().ToList() : new List<object>();
+                    
+                    ViewBag.Productos = productosConStock;
                     ViewBag.BodegaID = dto.BodegaID;
                     ViewBag.BodegaNombre = HttpContext.Session.GetString("BodegaNombre") ?? "Mi Bodega";
                     return View(dto);
@@ -250,11 +291,25 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
                 try
                 {
                     var productos = await _productoService.GetAllAsync(true);
-                    ViewBag.Productos = productos ?? new List<ProductoDto>();
+                    var inventarioBodegaGeneral = await _inventarioService.GetSaldoByBodegaAsync(1);
+                    
+                    var productosConStock = productos != null ? productos.Select(p =>
+                    {
+                        var saldo = inventarioBodegaGeneral?.FirstOrDefault(i => i.ProductoID == p.ProductoID);
+                        return new
+                        {
+                            p.ProductoID,
+                            p.SKU,
+                            p.Nombre,
+                            CantidadDisponible = saldo?.Cantidad ?? 0
+                        };
+                    }).Cast<object>().ToList() : new List<object>();
+                    
+                    ViewBag.Productos = productosConStock;
                 }
                 catch
                 {
-                    ViewBag.Productos = new List<ProductoDto>();
+                    ViewBag.Productos = new List<object>();
                 }
                 ViewBag.BodegaID = dto.BodegaID;
                 ViewBag.BodegaNombre = HttpContext.Session.GetString("BodegaNombre") ?? "Mi Bodega";
@@ -262,7 +317,45 @@ namespace JN_ProyectoPrograAvanzadaWeb_G1.Controllers
             }
         }
 
-        // GET: Tecnico/Solicitudes/Detalle/5
+        // GET: Tecnico/Movimientos/Detalle
+        [HttpGet]
+        public async Task<IActionResult> DetalleMovimiento(int id)
+        {
+            var rolId = HttpContext.Session.GetInt32("RolID");
+            if (rolId != 2)
+            {
+                return RedirectToAction("Dashboard", "Admin");
+            }
+
+            try
+            {
+                var movimiento = await _movimientoService.GetByIdAsync(id);
+                if (movimiento == null)
+                {
+                    TempData["Error"] = "Movimiento no encontrado";
+                    return RedirectToAction(nameof(Movimientos));
+                }
+
+                
+                var bodegaId = HttpContext.Session.GetInt32("BodegaID");
+                if (bodegaId.HasValue && movimiento.BodegaID != bodegaId.Value)
+                {
+                    TempData["Error"] = "No tienes permiso para ver este movimiento";
+                    return RedirectToAction(nameof(Movimientos));
+                }
+
+                ViewBag.BodegaNombre = HttpContext.Session.GetString("BodegaNombre") ?? "Mi Bodega";
+                return View(movimiento);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al cargar detalle de movimiento");
+                TempData["Error"] = "Error al cargar el movimiento";
+                return RedirectToAction(nameof(Movimientos));
+            }
+        }
+
+        // GET: Tecnico/Solicitudes/Detalle
         [HttpGet]
         public async Task<IActionResult> DetalleSolicitud(int id)
         {

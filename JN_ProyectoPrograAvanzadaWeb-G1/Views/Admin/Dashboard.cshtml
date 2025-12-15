@@ -14,7 +14,7 @@
         </div>
     </div>
 
-    <!-- Estadísticas generales -->
+    <!--  generales -->
     <div class="row mb-4">
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
@@ -89,7 +89,7 @@
         </div>
     </div>
 
-    <!-- Sección para gráficos -->
+    <!--  para gráficos -->
     <div class="row mb-4">
         <div class="col-xl-8 col-lg-7 mb-4">
             <div class="card shadow mb-4">
@@ -97,10 +97,7 @@
                     <h6 class="m-0 font-weight-bold text-primary">Gráficos de Inventario</h6>
                 </div>
                 <div class="card-body">
-                    <div id="graficosInventario">
-                        <canvas id="chartInventario" style="height: 300px;"></canvas>
-                        <p class="text-muted text-center mt-3">Los gráficos se cargarán aquí</p>
-                    </div>
+                    <canvas id="chartInventario" style="height: 300px;"></canvas>
                 </div>
             </div>
         </div>
@@ -111,16 +108,13 @@
                     <h6 class="m-0 font-weight-bold text-primary">KPIs Principales</h6>
                 </div>
                 <div class="card-body">
-                    <div id="kpisPrincipales">
-                        <canvas id="chartKPIs" style="height: 300px;"></canvas>
-                        <p class="text-muted text-center mt-3">Los KPIs se cargarán aquí</p>
-                    </div>
+                    <canvas id="chartKPIs" style="height: 300px;"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Gráficos adicionales -->
+    <!--  adicionales -->
     <div class="row">
         <div class="col-xl-6 col-lg-6 mb-4">
             <div class="card shadow mb-4">
@@ -128,10 +122,7 @@
                     <h6 class="m-0 font-weight-bold text-primary">Movimientos por Tipo</h6>
                 </div>
                 <div class="card-body">
-                    <div id="graficoMovimientos">
-                        <canvas id="chartMovimientos" style="height: 250px;"></canvas>
-                        <p class="text-muted text-center mt-3">Gráfico de movimientos</p>
-                    </div>
+                    <canvas id="chartMovimientos" style="height: 250px;"></canvas>
                 </div>
             </div>
         </div>
@@ -142,16 +133,13 @@
                     <h6 class="m-0 font-weight-bold text-primary">Productos Más Solicitados</h6>
                 </div>
                 <div class="card-body">
-                    <div id="graficoProductosSolicitados">
-                        <canvas id="chartProductosSolicitados" style="height: 250px;"></canvas>
-                        <p class="text-muted text-center mt-3">Top productos solicitados</p>
-                    </div>
+                    <canvas id="chartProductosSolicitados" style="height: 250px;"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Alertas de stock mínimo -->
+    <!-- Alertas de stock  -->
     <div class="row mt-4">
         <div class="col-12">
             <div class="card shadow">
@@ -167,15 +155,233 @@
         </div>
     </div>
 </div>
-
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script>
         $(document).ready(function () {
-            $('#totalBodegas').text('0');
-            $('#totalProductos').text('0');
-            $('#solicitudesPendientes').text('0');
-            $('#usuariosActivos').text('0');
+            // Cargar  desde ViewBag
+            $('#totalBodegas').text('@(ViewBag.TotalBodegas ?? 0)');
+            $('#totalProductos').text('@(ViewBag.TotalProductos ?? 0)');
+            $('#solicitudesPendientes').text('@(ViewBag.SolicitudesPendientes ?? 0)');
+            $('#usuariosActivos').text('@(ViewBag.UsuariosActivos ?? 0)');
+
+            
+            cargarAlertasStock();
+
+            // Cargar gráficos
+            cargarGraficos();
         });
+
+        function cargarAlertasStock() {
+            try {
+                const alertas = @Html.Raw(Json.Serialize(ViewBag.AlertasStock ?? new List<object>()));
+                
+                if (alertas && alertas.length > 0) {
+                    let html = '<table class="table table-sm table-hover">';
+                    html += '<thead><tr><th>Producto</th><th>SKU</th><th>Stock Actual</th><th>Stock Mínimo</th><th>Bodega</th></tr></thead>';
+                    html += '<tbody>';
+                    alertas.forEach(alerta => {
+                        const productoNombre = alerta.ProductoNombre || '';
+                        const productoSKU = alerta.ProductoSKU || '';
+                        const cantidad = alerta.Cantidad || 0;
+                        const stockMinimo = alerta.StockMinimo || 0;
+                        const bodegaNombre = alerta.BodegaNombre || '';
+                        
+                        html += `<tr>
+                            <td>${productoNombre}</td>
+                            <td><strong>${productoSKU}</strong></td>
+                            <td><span class="badge bg-danger">${cantidad}</span></td>
+                            <td>${stockMinimo}</td>
+                            <td>${bodegaNombre}</td>
+                        </tr>`;
+                    });
+                    html += '</tbody></table>';
+                    $('#alertasStock').html(html);
+                } else {
+                    $('#alertasStock').html('<p class="text-muted text-center">No hay alertas de stock mínimo</p>');
+                }
+            } catch (error) {
+                console.error('Error al cargar alertas:', error);
+                $('#alertasStock').html('<p class="text-muted text-center">No hay alertas de stock mínimo</p>');
+            }
+        }
+
+        function cargarGraficos() {
+            try {
+                const bodegas = @Html.Raw(Json.Serialize(ViewBag.Bodegas ?? new List<object>()));
+                const movimientos = @Html.Raw(Json.Serialize(ViewBag.Movimientos ?? new List<object>()));
+                const solicitudes = @Html.Raw(Json.Serialize(ViewBag.Solicitudes ?? new List<object>()));
+
+                // Gráfico 1: Distribucion de Inventario por Bodega
+                const ctxInventario = document.getElementById('chartInventario');
+                if (ctxInventario) {
+                    const bodegaLabels = bodegas.map(b => b.Nombre || b.nombre || '');
+                    const bodegaData = bodegas.map(b => {
+                        
+                        const movsBodega = movimientos.filter(m => (m.BodegaID || m.bodegaID) === (b.BodegaID || b.bodegaID));
+                        const productosUnicos = new Set(movsBodega.map(m => m.Detalles || []).flat().map(d => d.ProductoID || d.productoID));
+                        return productosUnicos.size;
+                    });
+
+                    new Chart(ctxInventario, {
+                        type: 'bar',
+                        data: {
+                            labels: bodegaLabels,
+                            datasets: [{
+                                label: 'Productos por Bodega',
+                                data: bodegaData,
+                                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { precision: 0 }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Grafico 2: KPIs Principales (Dona)
+                const ctxKPIs = document.getElementById('chartKPIs');
+                if (ctxKPIs) {
+                    const totalBodegas = @(ViewBag.TotalBodegas ?? 0);
+                    const totalProductos = @(ViewBag.TotalProductos ?? 0);
+                    const solicitudesPendientes = @(ViewBag.SolicitudesPendientes ?? 0);
+                    const usuariosActivos = @(ViewBag.UsuariosActivos ?? 0);
+
+                    new Chart(ctxKPIs, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Bodegas', 'Productos', 'Solicitudes Pendientes', 'Usuarios Activos'],
+                            datasets: [{
+                                data: [totalBodegas, totalProductos, solicitudesPendientes, usuariosActivos],
+                                backgroundColor: [
+                                    'rgba(54, 162, 235, 0.6)',
+                                    'rgba(75, 192, 75, 0.6)',
+                                    'rgba(255, 206, 86, 0.6)',
+                                    'rgba(153, 102, 255, 0.6)'
+                                ],
+                                borderColor: [
+                                    'rgba(54, 162, 235, 1)',
+                                    'rgba(75, 192, 75, 1)',
+                                    'rgba(255, 206, 86, 1)',
+                                    'rgba(153, 102, 255, 1)'
+                                ],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                }
+
+                // Grafico 3: Movimientos por Tipo
+                const ctxMovimientos = document.getElementById('chartMovimientos');
+                if (ctxMovimientos) {
+                    const movimientosPorTipo = {};
+                    movimientos.forEach(mov => {
+                        const tipo = mov.TipoMovimientoNombre || mov.tipoMovimientoNombre || mov.TipoMovimientoCodigo || mov.tipoMovimientoCodigo || 'Sin Tipo';
+                        movimientosPorTipo[tipo] = (movimientosPorTipo[tipo] || 0) + 1;
+                    });
+
+                    const tipoLabels = Object.keys(movimientosPorTipo);
+                    const tipoData = Object.values(movimientosPorTipo);
+
+                    new Chart(ctxMovimientos, {
+                        type: 'pie',
+                        data: {
+                            labels: tipoLabels,
+                            datasets: [{
+                                label: 'Cantidad',
+                                data: tipoData,
+                                backgroundColor: [
+                                    'rgba(255, 99, 132, 0.6)',
+                                    'rgba(54, 162, 235, 0.6)',
+                                    'rgba(255, 206, 86, 0.6)',
+                                    'rgba(75, 192, 75, 0.6)',
+                                    'rgba(153, 102, 255, 0.6)',
+                                    'rgba(255, 159, 64, 0.6)'
+                                ],
+                                borderColor: [
+                                    'rgba(255, 99, 132, 1)',
+                                    'rgba(54, 162, 235, 1)',
+                                    'rgba(255, 206, 86, 1)',
+                                    'rgba(75, 192, 75, 1)',
+                                    'rgba(153, 102, 255, 1)',
+                                    'rgba(255, 159, 64, 1)'
+                                ],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                }
+
+                // Grafico 4: Productos Más Solicitados
+                const ctxProductosSolicitados = document.getElementById('chartProductosSolicitados');
+                if (ctxProductosSolicitados) {
+                    const productosSolicitados = {};
+                    solicitudes.forEach(sol => {
+                        if (sol.Detalles || sol.detalles) {
+                            const detalles = sol.Detalles || sol.detalles || [];
+                            detalles.forEach(det => {
+                                const productoNombre = det.ProductoNombre || det.productoNombre || 'Sin Nombre';
+                                const cantidad = det.CantidadSolicitada || det.cantidadSolicitada || 0;
+                                productosSolicitados[productoNombre] = (productosSolicitados[productoNombre] || 0) + cantidad;
+                            });
+                        }
+                    });
+
+                    // Ordenar y tomar top 5
+                    const productosOrdenados = Object.entries(productosSolicitados)
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 5);
+
+                    const productoLabels = productosOrdenados.map(p => p[0]);
+                    const productoData = productosOrdenados.map(p => p[1]);
+
+                    new Chart(ctxProductosSolicitados, {
+                        type: 'bar',
+                        data: {
+                            labels: productoLabels,
+                            datasets: [{
+                                label: 'Cantidad Solicitada',
+                                data: productoData,
+                                backgroundColor: 'rgba(75, 192, 75, 0.6)',
+                                borderColor: 'rgba(75, 192, 75, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            indexAxis: 'y',
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    ticks: { precision: 0 }
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error al cargar gráficos:', error);
+            }
+        }
     </script>
 }
+
 
